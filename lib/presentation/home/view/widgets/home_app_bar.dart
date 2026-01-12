@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../../core/constants/app_colors.dart';
 
 class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
@@ -18,80 +17,127 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final int? unreadCount;
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(64); // Slightly taller for breathing room
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return AppBar(
       backgroundColor: AppColors.background,
       elevation: 0,
+      scrolledUnderElevation: 0, // Keeps it clean on scroll
       automaticallyImplyLeading: false,
-      titleSpacing: 0,
-      title: Image.asset(
-        'assets/images/image6.png',
-        height: 40,
-        fit: BoxFit.contain,
+      centerTitle: false,
+      titleSpacing: 20, // Better balance from the left edge
+      shape: Border(
+        bottom: BorderSide(
+          color: AppColors.textPrimary.withOpacity(0.05), // Subtle "soulful" line
+          width: 1,
+        ),
+      ),
+      title: Hero(
+        tag: 'app_logo',
+        child: Image.asset(
+          'assets/images/image6.png',
+          height: 32, // Refined height for better balance
+          fit: BoxFit.contain,
+        ),
       ),
       actions: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: InkWell(
-            onTap: onTapNotifications,
-            borderRadius: BorderRadius.circular(24),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Icon(
-                    Icons.notifications_none,
-                    size: 26,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                if ((unreadCount ?? 0) > 0)
-                  Positioned(
-                    right: 2,
-                    top: 2,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+        // NOTIFICATIONS
+        _AppBarAction(
+          onTap: onTapNotifications,
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              const Icon(
+                Icons.notifications_none_rounded,
+                size: 28,
+                color: AppColors.textPrimary,
+              ),
+              if ((unreadCount ?? 0) > 0)
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.background, width: 2),
+                    ),
+                    child: Center(
                       child: Text(
-                        (unreadCount! > 99) ? '99+' : unreadCount!.toString(),
+                        unreadCount! > 9 ? '9+' : unreadCount!.toString(),
                         style: const TextStyle(
                           color: AppColors.background,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
+
+        // PROFILE AVATAR
         Padding(
-          padding: const EdgeInsets.only(right: 12, left: 4),
-          child: InkWell(
+          padding: const EdgeInsets.only(right: 16, left: 8),
+          child: GestureDetector(
             onTap: onTapProfile,
-            borderRadius: BorderRadius.circular(18),
-            child: CircleAvatar(
-              radius: 17,
-              backgroundColor: AppColors.surface,
-              backgroundImage: (avatarUrl != null && avatarUrl!.isNotEmpty)
-                  ? NetworkImage(avatarUrl!)
-                  : const AssetImage('assets/images/cr7.png')
-                        as ImageProvider,
+            child: Container(
+              padding: const EdgeInsets.all(2), // The "Ring" spacing
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.primary.withOpacity(0.3), // Soulful accent ring
+                  width: 1.5,
+                ),
+              ),
+              child: CircleAvatar(
+                radius: 16,
+                backgroundColor: AppColors.surface,
+                backgroundImage: _getAvatar(),
+              ),
             ),
           ),
         ),
       ],
+    );
+  }
+
+  ImageProvider _getAvatar() {
+    if (avatarUrl != null && avatarUrl!.isNotEmpty) {
+      return NetworkImage(avatarUrl!);
+    }
+    return const AssetImage('assets/images/cr7.png');
+  }
+}
+
+/// Helper for consistent icon action styling
+class _AppBarAction extends StatelessWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+
+  const _AppBarAction({required this.child, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 44,
+        height: 44,
+        alignment: Alignment.center,
+        child: child,
+      ),
     );
   }
 }
