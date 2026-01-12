@@ -22,7 +22,7 @@ class OtpVerificationScreen extends ConsumerStatefulWidget {
 
 class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
   static const int _otpLength = 6;
-  static const String _demoOtp = '123456'; // ✅ demo OTP
+  static const String _demoOtp = '123456';
 
   // Controllers + focus nodes for each digit
   late final List<TextEditingController> _controllers;

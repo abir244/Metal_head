@@ -27,8 +27,13 @@ class AppRouter {
       case RouteName.createnewpassword:
         return MaterialPageRoute(
           builder: (_) => const CreateNewPasswordScreen(),
+
         );
 
+      case RouteName.Home:
+        return MaterialPageRoute(
+          builder: (_) => const HomeScreen(),
+        );
 
       default:
         return MaterialPageRoute(

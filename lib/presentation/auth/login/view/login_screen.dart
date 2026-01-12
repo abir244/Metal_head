@@ -27,17 +27,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _onFormChanged() {
-    ref.read(loginProvider.notifier).onFormChanged(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-    );
+    ref
+        .read(loginProvider.notifier)
+        .onFormChanged(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
   }
 
   void _onLogin() {
-    ref.read(loginProvider.notifier).login(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-    );
+    ref
+        .read(loginProvider.notifier)
+        .login(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
   }
 
   @override
@@ -46,10 +50,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-      ),
+      appBar: AppBar(backgroundColor: AppColors.background, elevation: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
@@ -64,10 +65,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
             const SizedBox(height: 8),
 
-            Text(
-              'Login to your account',
-              style: AppTextStyles.body14Regular,
-            ),
+            Text('Login to your account', style: AppTextStyles.body14Regular),
 
             const SizedBox(height: 24),
 
@@ -96,10 +94,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               alignment: Alignment.centerRight,
               child: InkWell(
                 onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    RouteName.forgotPassword
-                  );
+                  Navigator.pushNamed(context, RouteName.forgotPassword);
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(4),
@@ -113,16 +108,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
 
-
-
-
             const SizedBox(height: 32),
 
             AppButton(
               text: 'Login',
               isLoading: state.isLoading,
               isEnabled: state.isFormValid,
-              onPressed: _onLogin,
+              onPressed: () {
+                // Navigate to Home screen
+                Navigator.pushNamed(
+                  context,
+                  RouteName.Home, // <-- use Home route here
+                );
+              },
             ),
 
             const SizedBox(height: 24),
@@ -131,10 +129,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             Center(
               child: GestureDetector(
                 onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    RouteName.registration,
-                  );
+                  Navigator.pushNamed(context, RouteName.registration);
                 },
                 child: RichText(
                   text: TextSpan(
@@ -154,14 +149,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
 
-
             const SizedBox(height: 24),
 
             if (state.error != null)
-              Text(
-                state.error!,
-                style: const TextStyle(color: Colors.red),
-              ),
+              Text(state.error!, style: const TextStyle(color: Colors.red)),
           ],
         ),
       ),

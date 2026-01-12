@@ -4,4 +4,6 @@ class RouteName {
   static const String forgotPassword = '/ForgotPasswordScreen';
   static const String otpVerification = '/OtpVerificationScreen';
   static const String createnewpassword = '/CreateNewPasswordScreen';
+  static const String Home = '/HomeScreen';
+
 }
