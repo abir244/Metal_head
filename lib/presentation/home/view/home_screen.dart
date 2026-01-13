@@ -1,6 +1,8 @@
+// lib/presentation/home/view/home_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:metalheadd/core/route/route_name.dart';
 import 'package:metalheadd/presentation/home/view/widgets/bottom_navbar.dart';
 import '../../../core/constants/app_colors.dart' as app_colors;
 import '../viewmodel/home_provider.dart';
@@ -8,8 +10,7 @@ import 'widgets/home_app_bar.dart';
 import 'widgets/child_profile_card.dart';
 import 'widgets/upcoming_match_card.dart';
 import 'widgets/match_list_view.dart';
-import 'widgets/player_of_match_card.dart';
-import 'widgets/vote_banner.dart'; // <-- add this import
+import 'widgets/vote_banner.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -22,14 +23,14 @@ class HomeScreen extends ConsumerWidget {
       backgroundColor: app_colors.AppColors.background,
       appBar: const HomeAppBar(avatarUrl: ''),
       body: state.loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
           : RefreshIndicator(
         onRefresh: () async => ref.read(homeProvider.notifier).refresh(),
         color: app_colors.AppColors.primary,
         backgroundColor: app_colors.AppColors.surface,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -41,55 +42,72 @@ class HomeScreen extends ConsumerWidget {
                   avatarRadius: 40,
                 ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
-              // --- Vote banner (CTA) ---
               VoteBanner(
                 onPressed: () {
-                  // Navigate to your voting route
-                  Navigator.pushNamed(context, '/voting');
+                  // Navigate to Voting (update route name if needed)
+                  Navigator.pushNamed(context,RouteName.votingrights);
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
-              if (state.upcomingMatches.isNotEmpty)
-                UpcomingMatchCard(match: state.upcomingMatches.first),
+              if (state.upcomingMatches.isNotEmpty) ...[
+                const _SectionLabel(label: "Upcoming Match"),
+                const SizedBox(height: 12),
+                // --- NAVIGATE FROM UPCOMING CARD ---
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      RouteName.matchdetails, // Your constant
+                      arguments: state.upcomingMatches.first.id, // Pass ID
+                    );
+                  },
+                  child: UpcomingMatchCard(
+                    match: state.upcomingMatches.first,
+                  ),
+                ),
+              ],
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
-              // if (state.upcomingMatches.isNotEmpty)
-              //   Column(
-              //     crossAxisAlignment: CrossAxisAlignment.start,
-              //     children: [
-              //       Text(
-              //         'Players of Match',
-              //         style: TextStyle(
-              //           fontSize: 16,
-              //           fontWeight: FontWeight.w600,
-              //           color: app_colors.AppColors.textPrimary,
-              //         ),
-              //       ),
-              //       const SizedBox(height: 8),
-              //       const Column(
-              //         children: [
-              //           // TODO: render PlayerOfMatchCard items here
-              //         ],
-              //       ),
-              //     ],
-              //   ),
+              const _SectionLabel(label: "Recent Matches"),
+              const SizedBox(height: 12),
 
-              const SizedBox(height: 16),
-
+              // --- MATCH LIST VIEW ---
+              // Inside MatchListView, the individual match items
+              // should trigger the same Navigator logic.
               MatchListView(
                 upcomingMatches: state.upcomingMatches,
                 matchHistory: state.matchHistory,
               ),
+
+              const SizedBox(height: 40),
             ],
           ),
         ),
       ),
       bottomNavigationBar: const CustomBottomNavBar(),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  final String label;
+  const _SectionLabel({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 0.5,
+        color: app_colors.AppColors.textPrimary,
+      ),
     );
   }
 }

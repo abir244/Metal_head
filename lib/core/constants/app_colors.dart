@@ -34,4 +34,9 @@ class AppColors {
 
   // ================= BORDER / DIVIDER =================
   static const Color divider = Color(0xFF2A2A2A);
+  static const Color cardBackground = Color(0xFF111111);
+  static const Color fieldBackground = Color(0xFF1C1C1E);
+  static const Color primaryYellow = Color(0xFFFFE600);
+  static const Color textGrey = Color(0xFF8E8E93);
+  static const Color textWhite = Colors.white;
 }

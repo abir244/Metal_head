@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart' as app_colors;
+import '../../../../core/route/route_name.dart';
 
 
 // Navigation provider
@@ -48,17 +49,20 @@ const List<NavItem> navItems = [
       icon: Icons.home_outlined,
       activeIcon: Icons.home_filled,
       label: 'Home',
-      route: '/home'),
+    route: RouteName.home,),
   NavItem(
       icon: Icons.child_care_outlined,
       activeIcon: Icons.child_care,
       label: 'Child',
       route: '/child'),
   NavItem(
-      icon: Icons.how_to_vote_outlined,
-      activeIcon: Icons.how_to_vote,
-      label: 'Voting',
-      route: '/voting'),
+    icon: Icons.how_to_vote_outlined,
+    activeIcon: Icons.how_to_vote,
+    label: 'Voting',
+    route: RouteName.voting,
+  ),
+
+
   NavItem(
       icon: Icons.manage_accounts_outlined,
       activeIcon: Icons.manage_accounts,
