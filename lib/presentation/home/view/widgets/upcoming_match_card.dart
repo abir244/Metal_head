@@ -1,3 +1,5 @@
+// lib/presentation/home/view/widgets/upcoming_match_card.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -14,7 +16,8 @@ class UpcomingMatchCard extends ConsumerWidget {
   final Match match;
   final VoidCallback? onTap;
 
-  /// 🔹 TEAM → IMAGE MAP (INIT HERE)
+  /// 🔹 UPDATED TEAM → IMAGE MAP
+  /// Added Liverpool and Chelsea to match your Figma design
   static const Map<String, String> _teamImages = {
     'Barcelona': 'barca.png',
     'Chelsea': 'chelsea.png',
@@ -22,6 +25,7 @@ class UpcomingMatchCard extends ConsumerWidget {
     'Manchester United': 'manutd.png',
     'Manchester City': 'mancity.png',
     'Nottingham Forest': 'forest.png',
+    'FCB': 'barca.png', // Added shortnames for robustness
   };
 
   @override
@@ -35,21 +39,27 @@ class UpcomingMatchCard extends ConsumerWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16), // Slightly rounder to match Figma cards
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
+          // Using a solid dark color or a more subtle gradient to match the Figma theme
           gradient: LinearGradient(
-            colors: [AppColors.primary, AppColors.textThird],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
+            colors: [
+              const Color(0xFF1E1E1E), // Darker start
+              AppColors.primary.withOpacity(0.2), // Faded primary color (Yellow/Blue)
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // HOME TEAM LOGO
             _teamLogo(match.homeTeam.name),
-            const SizedBox(width: 12),
 
             /// CENTER INFO
             Expanded(
@@ -59,39 +69,39 @@ class UpcomingMatchCard extends ConsumerWidget {
                   Text(
                     dateStr,
                     style: AppTextStyles.body14Regular.copyWith(
-                      color: AppColors.background,
-                      fontWeight: FontWeight.w600,
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(14),
+                      color: AppColors.primary, // Using the yellow/primary as the VS background
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text(
+                    child: const Text(
                       'VS',
-                      style: AppTextStyles.body14Regular.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w700,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     timeStr,
                     style: AppTextStyles.body14Regular.copyWith(
-                      color: AppColors.background,
-                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(width: 12),
+            // AWAY TEAM LOGO
             _teamLogo(match.awayTeam.name),
           ],
         ),
@@ -99,14 +109,31 @@ class UpcomingMatchCard extends ConsumerWidget {
     );
   }
 
-  /// 🔹 TEAM LOGO WIDGET
+  /// 🔹 UPDATED TEAM LOGO WIDGET
   Widget _teamLogo(String teamName) {
+    // If team is not found, it defaults to 'mancity.png'
     final imageName = _teamImages[teamName] ?? 'mancity.png';
 
-    return CircleAvatar(
-      radius: 22,
-      backgroundColor: AppColors.background,
-      backgroundImage: AssetImage('assets/images/$imageName'),
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 26, // Slightly larger for better visibility
+          backgroundColor: Colors.white.withOpacity(0.1),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Image.asset(
+              'assets/images/$imageName',
+              errorBuilder: (context, error, stackTrace) =>
+                  Image.asset('assets/images/mancity.png'), // Ultimate fallback
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          teamName,
+          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+        )
+      ],
     );
   }
 
