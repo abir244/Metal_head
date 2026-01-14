@@ -118,7 +118,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // Navigate to Home screen
                 Navigator.pushNamed(
                   context,
-                  RouteName.home, // <-- use Home route here
+                  RouteName.Wrappernav, // <-- use Home route here
                 );
               },
             ),

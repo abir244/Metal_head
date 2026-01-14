@@ -5,8 +5,15 @@ import '../../presentation/auth/login/view/login_screen.dart';
 import '../../presentation/auth/otp/view/create_new_password_screen.dart';
 import '../../presentation/auth/otp/view/otp_verification_screen.dart';
 import '../../presentation/auth/registration/view/registration_screen.dart';
+import '../../presentation/home/model/child_profile.dart';
 import '../../presentation/home/view/home_screen.dart';
+import '../../presentation/home/view/widgets/child_profile_card.dart';
+import '../../presentation/main_wrapper.dart';
+
+import '../../presentation/manager/View/manager_screen.dart';
+import '../../presentation/manager/View/match_publish_screen.dart';
 import '../../presentation/match_details/view/match_details_screen.dart';
+import '../../presentation/profile/child_profile/view/child_profile_screen.dart';
 import '../../presentation/voting/view/voting_screen.dart';
 import '../../presentation/voting_rights/view/assign_voting_view.dart';
 import 'route_name.dart';

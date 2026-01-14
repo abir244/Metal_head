@@ -10,13 +10,15 @@ class ChildProfileCard extends ConsumerWidget {
     required this.child,
     this.padding = const EdgeInsets.all(16),
     this.showTitle = true,
-    this.avatarRadius = 32, // Increased for better balance
+    this.avatarRadius = 32,
+    this.fullView = false, // NEW: whether to show extra details
   });
 
   final ChildProfile child;
   final EdgeInsetsGeometry padding;
   final bool showTitle;
   final double avatarRadius;
+  final bool fullView; // NEW
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -74,7 +76,7 @@ class ChildProfileCard extends ConsumerWidget {
                           width: 24,
                           height: 3,
                           decoration: BoxDecoration(
-                            color: AppColors.primary, // Using primary color for accent
+                            color: AppColors.primary,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -96,6 +98,7 @@ class ChildProfileCard extends ConsumerWidget {
                       child: child,
                       labelStyle: labelStyle,
                       valueStyle: valueStyle,
+                      fullView: fullView, // pass the flag
                     ),
                   ],
                 )
@@ -114,6 +117,7 @@ class ChildProfileCard extends ConsumerWidget {
                         child: child,
                         labelStyle: labelStyle,
                         valueStyle: valueStyle,
+                        fullView: fullView, // pass the flag
                       ),
                     ),
                   ],
@@ -149,7 +153,6 @@ class _AvatarBlock extends StatelessWidget {
                 backgroundImage: _avatarProvider(child.imageUrl),
               ),
             ),
-            // THE ACTIVE STATUS DOT ON AVATAR
             Positioned(
               right: 2,
               bottom: 2,
@@ -190,11 +193,14 @@ class _AvatarBlock extends StatelessWidget {
   }
 
   ImageProvider _avatarProvider(String? url) {
+    // Debug: Force a network image to see if logic is okay
+    // return const NetworkImage('https://i.pravatar.cc/300');
+
     if (url != null && url.trim().isNotEmpty) {
       if (url.startsWith('http')) return NetworkImage(url);
       return AssetImage(url);
     }
-    return const AssetImage('assets/images/child.png');
+    return const AssetImage('assets/images/cr7.png');
   }
 }
 
@@ -203,11 +209,13 @@ class _DefinitionList extends StatelessWidget {
     required this.child,
     required this.labelStyle,
     required this.valueStyle,
+    this.fullView = false, // NEW
   });
 
   final ChildProfile child;
   final TextStyle labelStyle;
   final TextStyle valueStyle;
+  final bool fullView; // NEW
 
   @override
   Widget build(BuildContext context) {
@@ -229,6 +237,44 @@ class _DefinitionList extends StatelessWidget {
           ),
           const SizedBox(height: 12),
         ],
+        if (fullView) ...[
+          if (child.age != null)
+            _BaselineRow(
+              label: 'Age',
+              labelStyle: labelStyle,
+              value: '${child.age}',
+              valueStyle: valueStyle,
+            ),
+          if (child.height != null)
+            _BaselineRow(
+              label: 'Height',
+              labelStyle: labelStyle,
+              value: '${child.height} cm',
+              valueStyle: valueStyle,
+            ),
+          if (child.weight != null)
+            _BaselineRow(
+              label: 'Weight',
+              labelStyle: labelStyle,
+              value: '${child.weight} kg',
+              valueStyle: valueStyle,
+            ),
+          if (child.foot != null)
+            _BaselineRow(
+              label: 'Preferred Foot',
+              labelStyle: labelStyle,
+              value: child.foot!,
+              valueStyle: valueStyle,
+            ),
+          if (child.notes != null)
+            _BaselineRow(
+              label: 'Notes',
+              labelStyle: labelStyle,
+              value: child.notes!,
+              valueStyle: valueStyle,
+            ),
+          const SizedBox(height: 12),
+        ],
         _BaselineRow(
           label: 'Status',
           labelStyle: labelStyle,
@@ -240,6 +286,7 @@ class _DefinitionList extends StatelessWidget {
   }
 }
 
+// ----- _BaselineRow, _DashedLinePainter, _StatusPill stay unchanged -----
 class _BaselineRow extends StatelessWidget {
   const _BaselineRow({
     required this.label,

@@ -1,9 +1,9 @@
-
 import 'team.dart';
 
 enum MatchStatus { upcoming, live, finished }
+
 class Match {
-  final String id; // <--- ADD THIS
+  final String id;
   final Team homeTeam;
   final Team awayTeam;
   final DateTime startDate;
@@ -13,7 +13,7 @@ class Match {
   final int? scoreAway;
 
   const Match({
-    required this.id, // <--- ADD THIS
+    required this.id,
     required this.homeTeam,
     required this.awayTeam,
     required this.startDate,
@@ -23,20 +23,20 @@ class Match {
     this.scoreAway,
   });
 
-  // Update your mock helpers to include IDs
+  // --- ADD THESE METHODS TO FIX THE REPOSITORY ERRORS ---
   static List<Match> mockUpcoming() => [
     Match(
-      id: 'm1', // Add unique IDs
-      homeTeam: const Team(name: 'Barcelona', logoUrl: 'assets/images/barca.png'),
-      awayTeam: const Team(name: 'Man. Utd', logoUrl: 'assets/images/manutd.png'),
+      id: 'm1',
+      homeTeam: const Team(name: 'Liverpool', logoUrl: 'assets/images/liverpool.png'),
+      awayTeam: const Team(name: 'Chelsea', logoUrl: 'assets/images/chelsea.png'),
       startDate: DateTime(2025, 7, 18, 18, 30),
-      leagueName: 'UCL - Road to Final',
+      leagueName: 'Premier League',
       status: MatchStatus.upcoming,
     ),
     Match(
       id: 'm2',
-      homeTeam: const Team(name: 'Liverpool', logoUrl: 'assets/images/liverpool.png'),
-      awayTeam: const Team(name: 'Chelsea', logoUrl: 'assets/images/chelsea.png'),
+      homeTeam: const Team(name: 'Manchester City', logoUrl: 'assets/images/mancity.png'),
+      awayTeam: const Team(name: 'Manchester United', logoUrl: 'assets/images/manutd.png'),
       startDate: DateTime(2025, 7, 18, 18, 30),
       leagueName: 'Premier League',
       status: MatchStatus.upcoming,
@@ -48,7 +48,7 @@ class Match {
       id: 'm3',
       homeTeam: const Team(name: 'N Forest', logoUrl: 'assets/images/forest.png'),
       awayTeam: const Team(name: 'Man City', logoUrl: 'assets/images/mancity.png'),
-      startDate: DateTime(2025, 7, 20, 18, 30),
+      startDate: DateTime(2025, 7, 10, 15, 00),
       leagueName: 'Premier League',
       status: MatchStatus.finished,
       scoreHome: 0,

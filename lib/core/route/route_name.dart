@@ -9,5 +9,13 @@ class RouteName {
   static const matchdetails = '/match-details';
   static const voting= '/VotingScreen';
   static const votingrights = '/AssignVotingView';
+  static const ChildProfile1 = '/ChildProfileCard';
+  static const ChildProfile2 = '/ChildProfileScreen';
+  static const Wrappernav='/MainWrapper';
+  static const managerscreen1='/ManagerAccessScreen';
+  static const managerscreen2='/MatchPublishScreen';
+
+
+
 
 }

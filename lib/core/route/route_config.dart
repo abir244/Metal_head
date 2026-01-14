@@ -3,6 +3,7 @@ part of 'route_import_path.dart';
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+
     // ---------------- AUTH ----------------
       case RouteName.registration:
         return MaterialPageRoute(
@@ -29,8 +30,6 @@ class AppRouter {
           builder: (_) => const CreateNewPasswordScreen(),
         );
 
-
-
       case RouteName.votingrights:
         return MaterialPageRoute(
           builder: (_) => const AssignVotingView(),
@@ -42,19 +41,63 @@ class AppRouter {
           builder: (_) => const HomeScreen(),
         );
 
+      case RouteName.ChildProfile1:
+        {
+          // Read the ChildProfile argument
+          final child = settings.arguments as ChildProfile?;
+          if (child == null) {
+            return MaterialPageRoute(
+              builder: (_) => const Scaffold(
+                body: Center(child: Text('No child data provided')),
+              ),
+            );
+          }
+          return MaterialPageRoute(
+            builder: (_) => ChildProfileCard(child: child),
+          );
+        }
+
+      case RouteName.Wrappernav: // Define this constant in your RouteName class
+        return MaterialPageRoute(builder: (_) => const MainWrapper());
+
     // ---------------- MATCH DETAILS ----------------
       case RouteName.matchdetails:
-        final String matchId = settings.arguments as String;
-
-        return MaterialPageRoute(
-          builder: (_) => MatchDetailsScreen(matchId: matchId),
-        );
+        {
+          final matchId = settings.arguments as String?;
+          if (matchId == null) {
+            return MaterialPageRoute(
+              builder: (_) => const Scaffold(
+                body: Center(child: Text('Match ID not provided')),
+              ),
+            );
+          }
+          return MaterialPageRoute(
+            builder: (_) => MatchDetailsScreen(matchId: matchId),
+          );
+        }
 
     // ---------------- VOTING ----------------
       case RouteName.voting:
         return MaterialPageRoute(
-          builder: (_) => const VotingScreen(matchId: '',),
+          builder: (_) => const VotingScreen(), // no arguments needed
         );
+
+
+      case RouteName.ChildProfile2:
+        return MaterialPageRoute(
+          builder: (_) => const ChildProfileScreen(), // no arguments needed
+        );
+
+      case RouteName.managerscreen1:
+        return MaterialPageRoute(
+          builder: (_) => const ManagerAccessScreen(), // no arguments needed
+        );
+
+      case RouteName.managerscreen2:
+        return MaterialPageRoute(
+          builder: (_) => const MatchPublishScreen(), // no arguments needed
+        );
+
     // ---------------- DEFAULT ----------------
       default:
         return MaterialPageRoute(
