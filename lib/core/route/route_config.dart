@@ -82,21 +82,23 @@ class AppRouter {
           builder: (_) => const VotingScreen(), // no arguments needed
         );
 
+      case RouteName.managerscreen:
+        return MaterialPageRoute(
+          builder: (_) => const ManagerAccessScreen(), // no arguments needed
+        );
+
+      case RouteName.managerdetails:
+        return MaterialPageRoute(
+          builder: (_) => const  MatchDetailsScreen(matchId: '1',), // no arguments needed
+        );
+
 
       case RouteName.ChildProfile2:
         return MaterialPageRoute(
           builder: (_) => const ChildProfileScreen(), // no arguments needed
         );
 
-      case RouteName.managerscreen1:
-        return MaterialPageRoute(
-          builder: (_) => const ManagerAccessScreen(), // no arguments needed
-        );
 
-      case RouteName.managerscreen2:
-        return MaterialPageRoute(
-          builder: (_) => const MatchPublishScreen(), // no arguments needed
-        );
 
     // ---------------- DEFAULT ----------------
       default:

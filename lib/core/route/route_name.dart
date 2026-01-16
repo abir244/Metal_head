@@ -12,8 +12,9 @@ class RouteName {
   static const ChildProfile1 = '/ChildProfileCard';
   static const ChildProfile2 = '/ChildProfileScreen';
   static const Wrappernav='/MainWrapper';
-  static const managerscreen1='/ManagerAccessScreen';
-  static const managerscreen2='/MatchPublishScreen';
+  static const managerscreen='/ManagerAccessScreen';
+  static const managerdetails='/ MatchDetailsScreen';
+
 
 
 
