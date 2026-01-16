@@ -3,145 +3,223 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart' as app_colors;
-import '../../../../core/route/route_name.dart';
 
-// ---------------- Providers ----------------
 
-final navigationProvider = StateNotifierProvider<NavigationNotifier, NavigationState>(
+/// ============================================================
+/// PROVIDERS
+/// ============================================================
+
+/// Controls selected bottom navigation index
+final navigationProvider =
+StateNotifierProvider<NavigationNotifier, int>(
       (ref) => NavigationNotifier(),
 );
 
-// This provider controls the visibility
+class NavigationNotifier extends StateNotifier<int> {
+  NavigationNotifier() : super(0);
+
+  void updateIndex(int index) {
+    state = index;
+  }
+}
+
+/// Controls bottom navbar visibility
 final navbarVisibleProvider = StateProvider<bool>((ref) => true);
 
-class NavigationState {
-  final int currentIndex;
-  NavigationState({this.currentIndex = 0});
-  NavigationState copyWith({int? currentIndex}) {
-    return NavigationState(currentIndex: currentIndex ?? this.currentIndex);
-  }
-}
 
-class NavigationNotifier extends StateNotifier<NavigationState> {
-  NavigationNotifier() : super(NavigationState());
-  void updateIndex(int index) {
-    state = state.copyWith(currentIndex: index);
-  }
-}
-
-// ---------------- Model & Data ----------------
+/// ============================================================
+/// MODEL
+/// ============================================================
 
 class NavItem {
-  final IconData icon, activeIcon;
+  final IconData icon;
+  final IconData activeIcon;
   final String label;
-  const NavItem({required this.icon, required this.activeIcon, required this.label});
+
+  const NavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+  });
 }
 
-final List<NavItem> navItems = [
-  const NavItem(icon: Icons.home_outlined, activeIcon: Icons.home, label: 'Home'),
-  const NavItem(icon: Icons.face_outlined, activeIcon: Icons.face, label: 'Child'),
-  const NavItem(icon: Icons.how_to_vote_outlined, activeIcon: Icons.how_to_vote, label: 'Voting'),
-  const NavItem(icon: Icons.person_outline, activeIcon: Icons.person, label: 'Manager'),
-  const NavItem(icon: Icons.directions_run_outlined, activeIcon: Icons.directions_run, label: 'Player'),
+/// Navigation items list
+const List<NavItem> navItems = [
+  NavItem(
+    icon: Icons.home_outlined,
+    activeIcon: Icons.home,
+    label: 'Home',
+  ),
+  NavItem(
+    icon: Icons.face_outlined,
+    activeIcon: Icons.face,
+    label: 'Child',
+  ),
+  NavItem(
+    icon: Icons.how_to_vote_outlined,
+    activeIcon: Icons.how_to_vote,
+    label: 'Voting',
+  ),
+  NavItem(
+    icon: Icons.person_outline,
+    activeIcon: Icons.person,
+    label: 'Manager',
+  ),
+  NavItem(
+    icon: Icons.directions_run_outlined,
+    activeIcon: Icons.directions_run,
+    label: 'Player',
+  ),
 ];
 
-// ---------------- CustomBottomNavBar Widget ----------------
+
+/// ============================================================
+/// MAIN BOTTOM NAV BAR
+/// ============================================================
 
 class CustomBottomNavBar extends ConsumerWidget {
   const CustomBottomNavBar({super.key});
 
+  static const Duration _animationDuration =
+  Duration(milliseconds: 350);
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final navState = ref.watch(navigationProvider);
-    final double bottomPadding = MediaQuery.of(context).padding.bottom;
-
-    // UPDATED: Height set to a stable value based on device padding
-    final double barHeight = 65 + bottomPadding;
-    const Duration animDuration = Duration(milliseconds: 350);
+    final int currentIndex = ref.watch(navigationProvider);
+    final double bottomPadding =
+        MediaQuery.of(context).padding.bottom;
 
     return Container(
-      height: barHeight,
+      height: 65 + bottomPadding,
       decoration: BoxDecoration(
-        color: Colors.black, // This background will now slide with the widget
-        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.08), width: 0.5)),
+        color: Colors.black,
+        border: Border(
+          top: BorderSide(
+            color: Colors.white.withOpacity(0.08),
+            width: 0.5,
+          ),
+        ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: List.generate(navItems.length, (index) {
-          final isSelected = navState.currentIndex == index;
-          final item = navItems[index];
-
-          return Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
+        children: List.generate(
+          navItems.length,
+              (index) {
+            return _BottomNavItem(
+              item: navItems[index],
+              isSelected: currentIndex == index,
+              bottomPadding: bottomPadding,
               onTap: () {
-                if (!isSelected) {
+                if (currentIndex != index) {
                   HapticFeedback.lightImpact();
-                  ref.read(navigationProvider.notifier).updateIndex(index);
 
-                  // UPDATED: Always make navbar visible when a tab is clicked
-                  ref.read(navbarVisibleProvider.notifier).state = true;
+                  // Update tab index
+                  ref
+                      .read(navigationProvider.notifier)
+                      .updateIndex(index);
+
+                  // Ensure navbar is visible
+                  ref
+                      .read(navbarVisibleProvider.notifier)
+                      .state = true;
                 }
               },
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  // 1. Top Yellow Indicator
-                  AnimatedContainer(
-                    duration: animDuration,
-                    curve: Curves.easeOutCubic,
-                    width: isSelected ? 40 : 0,
-                    height: 2.5,
-                    decoration: BoxDecoration(
-                      color: isSelected ? app_colors.AppColors.primary : Colors.transparent,
-                      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(2)),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: bottomPadding > 0 ? 5 : 0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // 2. Icon with Scale Animation
-                          AnimatedScale(
-                            duration: animDuration,
-                            scale: isSelected ? 1.18 : 1.0,
-                            curve: Curves.easeOutBack,
-                            child: TweenAnimationBuilder<Color?>(
-                              duration: animDuration,
-                              tween: ColorTween(
-                                begin: Colors.white.withOpacity(0.5),
-                                end: isSelected ? app_colors.AppColors.primary : Colors.white.withOpacity(0.5),
-                              ),
-                              builder: (context, color, child) {
-                                return Icon(isSelected ? item.activeIcon : item.icon, color: color, size: 24);
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          // 3. Animated Label Text
-                          AnimatedDefaultTextStyle(
-                            duration: animDuration,
-                            curve: Curves.easeInOut,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
-                              color: isSelected ? app_colors.AppColors.primary : Colors.white.withOpacity(0.5),
-                              letterSpacing: 0.2,
-                            ),
-                            child: Text(item.label),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+
+/// ============================================================
+/// SINGLE NAV ITEM WIDGET
+/// ============================================================
+
+class _BottomNavItem extends StatelessWidget {
+  const _BottomNavItem({
+    required this.item,
+    required this.isSelected,
+    required this.onTap,
+    required this.bottomPadding,
+  });
+
+  final NavItem item;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final double bottomPadding;
+
+  static const Duration _animationDuration =
+  Duration(milliseconds: 350);
+
+  @override
+  Widget build(BuildContext context) {
+    final Color itemColor = isSelected
+        ? app_colors.AppColors.primary
+        : Colors.white.withOpacity(0.5);
+
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Column(
+          children: [
+            /// Top indicator
+            AnimatedContainer(
+              duration: _animationDuration,
+              curve: Curves.easeOutCubic,
+              width: isSelected ? 40 : 0,
+              height: 2.5,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? app_colors.AppColors.primary
+                    : Colors.transparent,
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(2),
+                ),
               ),
             ),
-          );
-        }),
+
+            /// Icon + Label
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: bottomPadding > 0 ? 5 : 0,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AnimatedScale(
+                      duration: _animationDuration,
+                      scale: isSelected ? 1.18 : 1.0,
+                      curve: Curves.easeOutBack,
+                      child: Icon(
+                        isSelected
+                            ? item.activeIcon
+                            : item.icon,
+                        color: itemColor,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    AnimatedDefaultTextStyle(
+                      duration: _animationDuration,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w400,
+                        color: itemColor,
+                        letterSpacing: 0.2,
+                      ),
+                      child: Text(item.label),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
