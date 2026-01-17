@@ -11,6 +11,7 @@ import 'package:metalheadd/presentation/manager_access/view/widgets/StartButton.
 import 'package:metalheadd/presentation/manager_access/view/widgets/VotingPlayerListButton.dart';
 import 'package:metalheadd/presentation/manager_access/view/widgets/header.dart';
 
+import '../../voting/view/voting_screen.dart';
 import '../viewmodel/match_timer_provider.dart';
 
 class MatchDetailsScreen extends ConsumerWidget {
@@ -57,8 +58,17 @@ class MatchDetailsScreen extends ConsumerWidget {
                   _buildSectionLabel("Management Dashboard"),
                   const SizedBox(height: 24),
 
-                  // Player List Action
-                  const VotingPlayerListButton(),
+                  VotingPlayerListButton(
+                    onPlusTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const VotingScreen(), // No id needed
+                        ),
+                      );
+                    },
+                  ),
+
 
                   const _CustomDivider(),
 

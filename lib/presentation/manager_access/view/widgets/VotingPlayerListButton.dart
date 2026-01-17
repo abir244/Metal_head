@@ -2,11 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:metalheadd/core/constants/app_colors.dart';
 import 'package:metalheadd/core/theme/app_text_styles.dart';
-
 class VotingPlayerListButton extends StatelessWidget {
-  final VoidCallback? onTap;
+  final VoidCallback? onPlusTap; // Only for the + button
+  final VoidCallback? onTap; // Optional tap for the whole card
 
-  const VotingPlayerListButton({super.key, this.onTap});
+  const VotingPlayerListButton({super.key, this.onTap, this.onPlusTap});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,6 @@ class VotingPlayerListButton extends StatelessWidget {
           color: AppColors.cardBackground,
           borderRadius: BorderRadius.circular(16),
         ),
-
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -42,17 +41,21 @@ class VotingPlayerListButton extends StatelessWidget {
             ),
 
             // RIGHT SIDE — YELLOW CIRCLE (+)
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.primary,
-              ),
-              child: const Icon(
-                Icons.add,
-                size: 22,
-                color: Colors.black,
+            InkWell(
+              borderRadius: BorderRadius.circular(18),
+              onTap: onPlusTap, // Only triggers when + is pressed
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.primary,
+                ),
+                child: const Icon(
+                  Icons.add,
+                  size: 22,
+                  color: Colors.black,
+                ),
               ),
             ),
           ],

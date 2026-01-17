@@ -7,6 +7,7 @@ class VotingPlayerRow extends StatelessWidget {
   final int index;
   final PlayerCandidate player;
   final bool selected;
+  final bool isLastItem;
   final VoidCallback onTap;
 
   const VotingPlayerRow({
@@ -14,6 +15,7 @@ class VotingPlayerRow extends StatelessWidget {
     required this.index,
     required this.player,
     required this.selected,
+    this.isLastItem = false,
     required this.onTap,
   });
 
@@ -22,70 +24,92 @@ class VotingPlayerRow extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.surfaceDark, // same as 0xff333
-          borderRadius: BorderRadius.circular(32),
-          border: Border(
+          color: const Color(0xFF1A1A1A),
+          border: isLastItem
+              ? null
+              : Border(
             bottom: BorderSide(
-              color: selected ? AppColors.primary : AppColors.divider,
-              width: selected ? 2 : 1,
+              color: Colors.white.withOpacity(0.05),
+              width: 1,
             ),
           ),
+          borderRadius: isLastItem
+              ? const BorderRadius.only(
+            bottomLeft: Radius.circular(12),
+            bottomRight: Radius.circular(12),
+          )
+              : null,
         ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            /// Index
-            Text(
-              index.toString(),
-              style: TextStyle(
-                color: selected ? AppColors.primary : AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-
-            const SizedBox(width: 16),
-
-            /// Avatar
-            CircleAvatar(
-              radius: 18,
-              backgroundImage: AssetImage(player.avatarUrl),
-            ),
-
-            const SizedBox(width: 16),
-
-            /// Player Name
-            Expanded(
+            // Index
+            SizedBox(
+              width: 24,
               child: Text(
-                player.name,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                index.toString(),
+                style: TextStyle(
+                  color: selected ? AppColors.primary : Colors.white.withOpacity(0.6),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
 
-            /// Jersey Number
-            Text(
-              '#${player.number}',
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 14,
+            const SizedBox(width: 12),
+
+            // Avatar
+            CircleAvatar(
+              radius: 16,
+              backgroundImage: AssetImage(player.avatarUrl),
+              backgroundColor: Colors.grey[800],
+            ),
+
+            const SizedBox(width: 12),
+
+            // Player Name
+            Expanded(
+              flex: 2,
+              child: Text(
+                player.name,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -0.2,
+                ),
               ),
             ),
 
-            const SizedBox(width: 30),
+            const SizedBox(width: 8),
 
-            /// Position
-            Text(
-              player.position,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 14,
+            // Jersey Number
+            SizedBox(
+              width: 55,
+              child: Text(
+                '#${player.number}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.5),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+
+            // Position
+            SizedBox(
+              width: 70,
+              child: Text(
+                player.position,
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.5),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ),
           ],
