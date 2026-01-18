@@ -3,24 +3,28 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../model/match_model.dart';
+// 1. Point this to the file where your MatchModel is defined
 
-/// Renamed to ManagerMatchHeader to avoid naming conflicts
+
 class ManagerMatchHeader extends StatelessWidget {
+  // 2. Updated type to MatchModel
   final MatchModel match;
 
   const ManagerMatchHeader({super.key, required this.match});
 
-  /// Helper to get initials (e.g. "Liverpool" -> "L", "Man City" -> "MC")
+  /// Helper to get initials (e.g. "Manchester City" -> "MC")
   String _getInitials(String name) {
+    if (name.isEmpty) return "";
     List<String> parts = name.trim().split(' ');
     if (parts.length > 1 && parts[1].isNotEmpty) {
       return (parts[0][0] + parts[1][0]).toUpperCase();
     }
-    return name.isNotEmpty ? name[0].toUpperCase() : "";
+    return name[0].toUpperCase();
   }
 
   @override
   Widget build(BuildContext context) {
+    // 3. Updated property names to match your MatchModel (matchDateTime)
     final timeText = DateFormat('hh:mm a').format(match.matchDateTime);
     final dateText = DateFormat('dd MMMM yyyy').format(match.matchDateTime);
 
@@ -36,18 +40,21 @@ class ManagerMatchHeader extends StatelessWidget {
           ),
           child: Row(
             children: [
+              // Team Names and Real Colors
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _teamRow(match.homeTeamName, match.homeColor),
+                    // 4. Using homeTeamName and homeColor from model
+                    _buildTeamRow(match.homeTeamName, match.homeColor),
                     const SizedBox(height: 14),
-                    _teamRow(match.awayTeamName, match.awayColor),
+                    // 5. Using awayTeamName and awayColor from model
+                    _buildTeamRow(match.awayTeamName, match.awayColor),
                   ],
                 ),
               ),
 
-              // The Blue Accent Line
+              // Decorative Blue Divider
               Container(
                 width: 2.5,
                 height: 52,
@@ -55,24 +62,17 @@ class ManagerMatchHeader extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.textThird,
                   borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.textThird.withOpacity(0.4),
-                      blurRadius: 6,
-                    ),
-                  ],
                 ),
               ),
 
-              // Time and Date
+              // Time and Date Section
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     timeText.toUpperCase(),
                     style: AppTextStyles.body14SemiBold.copyWith(
-                      color: AppColors.primary,
-                      letterSpacing: 0.5,
+                      color: AppColors.primary, // Your Yellow
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -88,32 +88,44 @@ class ManagerMatchHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
+        // Stadium Footer
         Padding(
           padding: const EdgeInsets.only(left: 6),
-          child: Text(
-            match.stadium,
-            style: AppTextStyles.caption12Regular.copyWith(
-              color: AppColors.textSecondary.withOpacity(0.8),
-              letterSpacing: 0.2,
-            ),
+          child: Row(
+            children: [
+              Icon(
+                  Icons.location_on_outlined,
+                  size: 14,
+                  color: AppColors.textSecondary.withOpacity(0.6)
+              ),
+              const SizedBox(width: 4),
+              Text(
+                match.stadium,
+                style: AppTextStyles.caption12Regular.copyWith(
+                  color: AppColors.textSecondary.withOpacity(0.8),
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _teamRow(String name, int color) {
+  /// Helper to build the team row using the model's integer color
+  Widget _buildTeamRow(String name, int colorValue) {
     return Row(
       children: [
         CircleAvatar(
           radius: 14,
-          backgroundColor: Color(color),
+          // 6. Convert the integer colorValue to a Flutter Color object
+          backgroundColor: Color(colorValue),
           child: Text(
             _getInitials(name),
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold
             ),
           ),
         ),

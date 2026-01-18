@@ -7,6 +7,7 @@ import 'package:metalheadd/core/widgets/app_input_field.dart';
 import 'package:metalheadd/core/widgets/app_button.dart';
 import '../../../../core/route/route_name.dart';
 import '../viewmodel/login_provider.dart';
+import '../../../home/view/widgets/bottom_navbar.dart'; // Import navigationProvider
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -30,18 +31,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref
         .read(loginProvider.notifier)
         .onFormChanged(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
   }
 
-  void _onLogin() {
-    ref
+  Future<void> _onLogin() async {
+    // Reset navigation to Home tab (index 0) before login
+    ref.read(navigationProvider.notifier).updateIndex(0);
+
+    // Perform actual login
+    final success = await ref
         .read(loginProvider.notifier)
         .login(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
+
+    // Navigate only if login was successful
+    if (success && mounted) {
+      Navigator.pushReplacementNamed(
+        context,
+        RouteName.Wrappernav,
+      );
+    }
   }
 
   @override
@@ -114,13 +127,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               text: 'Login',
               isLoading: state.isLoading,
               isEnabled: state.isFormValid,
-              onPressed: () {
-                // Navigate to Home screen
-                Navigator.pushNamed(
-                  context,
-                  RouteName.Wrappernav, // <-- use Home route here
-                );
-              },
+              onPressed: _onLogin,
             ),
 
             const SizedBox(height: 24),
@@ -152,7 +159,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             const SizedBox(height: 24),
 
             if (state.error != null)
-              Text(state.error!, style: const TextStyle(color: Colors.red)),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        state.error!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),

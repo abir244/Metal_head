@@ -11,14 +11,14 @@ class ChildProfileCard extends ConsumerWidget {
     this.padding = const EdgeInsets.all(16),
     this.showTitle = true,
     this.avatarRadius = 32,
-    this.fullView = false, // NEW: whether to show extra details
+    this.fullView = false,
   });
 
   final ChildProfile child;
   final EdgeInsetsGeometry padding;
   final bool showTitle;
   final double avatarRadius;
-  final bool fullView; // NEW
+  final bool fullView;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,6 +32,7 @@ class ChildProfileCard extends ConsumerWidget {
           color: AppColors.textSecondary.withOpacity(0.8),
           fontWeight: FontWeight.w500,
         );
+
         final valueStyle = AppTextStyles.body14Regular.copyWith(
           fontSize: isNarrow ? 13 : 14,
           color: AppColors.textPrimary,
@@ -44,13 +45,6 @@ class ChildProfileCard extends ConsumerWidget {
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: AppColors.divider.withOpacity(0.5)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,10 +59,7 @@ class ChildProfileCard extends ConsumerWidget {
                         Text(
                           "Child Profile",
                           style: AppTextStyles.body14Regular.copyWith(
-                            fontSize: 14,
-                            color: AppColors.textPrimary,
                             fontWeight: FontWeight.w800,
-                            letterSpacing: 0.5,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -98,13 +89,12 @@ class ChildProfileCard extends ConsumerWidget {
                       child: child,
                       labelStyle: labelStyle,
                       valueStyle: valueStyle,
-                      fullView: fullView, // pass the flag
+                      fullView: fullView,
                     ),
                   ],
                 )
               else
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       flex: 2,
@@ -117,7 +107,7 @@ class ChildProfileCard extends ConsumerWidget {
                         child: child,
                         labelStyle: labelStyle,
                         valueStyle: valueStyle,
-                        fullView: fullView, // pass the flag
+                        fullView: fullView,
                       ),
                     ),
                   ],
@@ -132,26 +122,21 @@ class ChildProfileCard extends ConsumerWidget {
 
 class _AvatarBlock extends StatelessWidget {
   const _AvatarBlock({required this.child, required this.radius});
+
   final ChildProfile child;
   final double radius;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
         Stack(
           children: [
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 3),
-              ),
-              child: CircleAvatar(
-                radius: radius,
-                backgroundColor: AppColors.surfaceDark,
-                backgroundImage: _avatarProvider(child.imageUrl),
-              ),
+            CircleAvatar(
+              radius: radius,
+              backgroundColor: AppColors.surfaceDark,
+              foregroundImage: _avatarProvider(child.imageUrl),
+              onForegroundImageError: (_, __) {},
             ),
             Positioned(
               right: 2,
@@ -171,21 +156,14 @@ class _AvatarBlock extends StatelessWidget {
         const SizedBox(height: 10),
         Text(
           child.name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
           style: AppTextStyles.body14Regular.copyWith(
-            color: AppColors.textPrimary,
             fontWeight: FontWeight.w700,
-            fontSize: 15,
           ),
         ),
         Text(
           child.school,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
           style: AppTextStyles.label12Medium.copyWith(
             color: AppColors.textMuted,
-            fontSize: 11,
           ),
         ),
       ],
@@ -193,11 +171,10 @@ class _AvatarBlock extends StatelessWidget {
   }
 
   ImageProvider _avatarProvider(String? url) {
-    // Debug: Force a network image to see if logic is okay
-    // return const NetworkImage('https://i.pravatar.cc/300');
-
     if (url != null && url.trim().isNotEmpty) {
-      if (url.startsWith('http')) return NetworkImage(url);
+      if (url.startsWith('http')) {
+        return NetworkImage(url);
+      }
       return AssetImage(url);
     }
     return const AssetImage('assets/images/cr7.png');
@@ -209,13 +186,13 @@ class _DefinitionList extends StatelessWidget {
     required this.child,
     required this.labelStyle,
     required this.valueStyle,
-    this.fullView = false, // NEW
+    this.fullView = false,
   });
 
   final ChildProfile child;
   final TextStyle labelStyle;
   final TextStyle valueStyle;
-  final bool fullView; // NEW
+  final bool fullView;
 
   @override
   Widget build(BuildContext context) {
@@ -223,58 +200,19 @@ class _DefinitionList extends StatelessWidget {
       children: [
         _BaselineRow(
           label: 'Jersey',
-          labelStyle: labelStyle,
           value: '#${child.jersey}',
+          labelStyle: labelStyle,
           valueStyle: valueStyle,
         ),
         const SizedBox(height: 12),
-        if (child.position != null) ...[
+        if (child.position != null)
           _BaselineRow(
             label: 'Position',
-            labelStyle: labelStyle,
             value: child.position!,
+            labelStyle: labelStyle,
             valueStyle: valueStyle,
           ),
-          const SizedBox(height: 12),
-        ],
-        if (fullView) ...[
-          if (child.age != null)
-            _BaselineRow(
-              label: 'Age',
-              labelStyle: labelStyle,
-              value: '${child.age}',
-              valueStyle: valueStyle,
-            ),
-          if (child.height != null)
-            _BaselineRow(
-              label: 'Height',
-              labelStyle: labelStyle,
-              value: '${child.height} cm',
-              valueStyle: valueStyle,
-            ),
-          if (child.weight != null)
-            _BaselineRow(
-              label: 'Weight',
-              labelStyle: labelStyle,
-              value: '${child.weight} kg',
-              valueStyle: valueStyle,
-            ),
-          if (child.foot != null)
-            _BaselineRow(
-              label: 'Preferred Foot',
-              labelStyle: labelStyle,
-              value: child.foot!,
-              valueStyle: valueStyle,
-            ),
-          if (child.notes != null)
-            _BaselineRow(
-              label: 'Notes',
-              labelStyle: labelStyle,
-              value: child.notes!,
-              valueStyle: valueStyle,
-            ),
-          const SizedBox(height: 12),
-        ],
+        const SizedBox(height: 12),
         _BaselineRow(
           label: 'Status',
           labelStyle: labelStyle,
@@ -286,7 +224,6 @@ class _DefinitionList extends StatelessWidget {
   }
 }
 
-// ----- _BaselineRow, _DashedLinePainter, _StatusPill stay unchanged -----
 class _BaselineRow extends StatelessWidget {
   const _BaselineRow({
     required this.label,
@@ -308,34 +245,12 @@ class _BaselineRow extends StatelessWidget {
       children: [
         Text(label, style: labelStyle),
         const SizedBox(width: 8),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: CustomPaint(painter: _DashedLinePainter()),
-          ),
-        ),
+        Expanded(child: Divider(color: AppColors.divider.withOpacity(0.4))),
         const SizedBox(width: 8),
         valueWidget ?? Text(value!, style: valueStyle),
       ],
     );
   }
-}
-
-class _DashedLinePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    double dashWidth = 2, dashSpace = 3, startX = 0;
-    final paint = Paint()
-      ..color = AppColors.divider.withOpacity(0.4)
-      ..strokeWidth = 1;
-    while (startX < size.width) {
-      canvas.drawLine(Offset(startX, 0), Offset(startX + dashWidth, 0), paint);
-      startX += dashWidth + dashSpace;
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
 class _StatusPill extends StatelessWidget {
@@ -350,27 +265,11 @@ class _StatusPill extends StatelessWidget {
         color: AppColors.success.withOpacity(0.1),
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: const BoxDecoration(
-              color: AppColors.success,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            text.toUpperCase(),
-            style: AppTextStyles.badge12SemiBold.copyWith(
-              color: AppColors.success,
-              fontSize: 10,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
+      child: Text(
+        text.toUpperCase(),
+        style: AppTextStyles.badge12SemiBold.copyWith(
+          color: AppColors.success,
+        ),
       ),
     );
   }

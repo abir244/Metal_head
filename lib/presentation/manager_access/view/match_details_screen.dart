@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:metalheadd/core/theme/app_text_styles.dart';
 import 'package:metalheadd/core/constants/app_colors.dart';
-import 'package:metalheadd/presentation/manager_access/model/match_model.dart';
 
-// Widget Imports
-import 'package:metalheadd/presentation/manager_access/view/widgets/MatchResultSection.dart';
-import 'package:metalheadd/presentation/manager_access/view/widgets/MatchTimePicker.dart';
-import 'package:metalheadd/presentation/manager_access/view/widgets/StartButton.dart';
-import 'package:metalheadd/presentation/manager_access/view/widgets/VotingPlayerListButton.dart';
-import 'package:metalheadd/presentation/manager_access/view/widgets/header.dart';
-
-import '../../voting/view/voting_screen.dart';
+// Model & ViewModel
+import '../model/match_model.dart';
 import '../viewmodel/match_timer_provider.dart';
+
+// Widgets
+import 'widgets/VotingPlayerListButton.dart';
+import 'widgets/MatchResultSection.dart';
+import 'widgets/MatchTimePicker.dart';
+import 'widgets/StartButton.dart';
+import 'widgets/header.dart';
 
 class MatchDetailsScreen extends ConsumerWidget {
   final MatchModel match;
@@ -21,107 +21,133 @@ class MatchDetailsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Watch the timer state to update UI reactively
     final timerState = ref.watch(matchTimerProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: _buildAppBar(context),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            // 1. Top Hero Card (Header)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: ManagerMatchHeader(match: match),
-            ),
+    return WillPopScope(
+      onWillPop: () async {
+        // ✅ This screen is pushed → just pop
+        Navigator.of(context).pop();
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: _buildAppBar(context),
+        body: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            children: [
+              /// ===============================
+              /// HEADER
+              /// ===============================
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: ManagerMatchHeader(match: match),
+              ),
 
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-            // 2. Main Smooth Management Dashboard
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppColors.surface, // Depth #121212
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.05),
-                  width: 1,
+              /// ===============================
+              /// MANAGEMENT DASHBOARD
+              /// ===============================
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.05),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionLabel("Management Dashboard"),
+                    const SizedBox(height: 24),
+
+                    /// PLAYER LIST
+                    const VotingPlayerListButton(),
+
+                    const _CustomDivider(),
+
+                    /// SCORE
+                    MatchResultSection(match: match),
+
+                    const _CustomDivider(),
+
+                    /// TIMER
+                    MatchTimePicker(
+                      match: match,
+                      onTimeChanged: (newTime) {
+                        debugPrint("Time updated: $newTime");
+                      },
+                    ),
+                  ],
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionLabel("Management Dashboard"),
-                  const SizedBox(height: 24),
 
-                  VotingPlayerListButton(
-                    onPlusTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const VotingScreen(), // No id needed
-                        ),
-                      );
-                    },
-                  ),
+              const SizedBox(height: 20),
 
+              /// ===============================
+              /// START / PAUSE BUTTON
+              /// ===============================
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    MatchStartButton(
+                      onPressed: () {
+                        ref
+                            .read(matchTimerProvider.notifier)
+                            .toggleTimer();
 
-                  const _CustomDivider(),
+                        debugPrint(
+                          "Match toggled: ${match.homeTeamName}",
+                        );
+                      },
+                    ),
 
-                  // Dynamic Result Tracking
-                  MatchResultSection(match: match),
-
-                  const _CustomDivider(),
-
-                  // Interactive / Workable Timer Display
-                  // This will show counting time automatically via Riverpod internal watch
-                  MatchTimePicker(
-                    match: match,
-                    onTimeChanged: (newTime) {
-                      debugPrint("Time updated to: $newTime");
-                    },
-                  ),
-                ],
+                    if (timerState.isLive) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _LiveDot(),
+                          const SizedBox(width: 8),
+                          Text(
+                            "MATCH IS CURRENTLY LIVE",
+                            style: AppTextStyles.overline10Medium.copyWith(
+                              color: AppColors.success,
+                              letterSpacing: 2,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
               ),
-            ),
 
-            const SizedBox(height: 20),
-
-            // 3. Main Action Button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: MatchStartButton(
-                onPressed: () {
-                  // WORKABLE: Toggles the timer start/stop
-                  ref.read(matchTimerProvider.notifier).toggleTimer();
-                  debugPrint("Match Status Toggled: ${match.homeTeamName}");
-                },
-              ),
-            ),
-
-            const SizedBox(height: 60),
-          ],
+              const SizedBox(height: 60),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // Helper for Section Labels
-  Widget _buildSectionLabel(String text) {
-    return Text(
-      text.toUpperCase(),
-      style: AppTextStyles.overline10Medium.copyWith(
-        color: AppColors.primary,
-        letterSpacing: 1.5,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-
+  /// ===============================
+  /// APP BAR
+  /// ===============================
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       backgroundColor: AppColors.background,
@@ -129,19 +155,57 @@ class MatchDetailsScreen extends ConsumerWidget {
       scrolledUnderElevation: 0,
       centerTitle: true,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+        icon: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: Colors.white,
+          size: 20,
+        ),
         onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
         'Manager Access',
-        style: AppTextStyles.heading18SemiBold.copyWith(color: Colors.white),
+        style: AppTextStyles.heading18SemiBold.copyWith(
+          color: Colors.white,
+          letterSpacing: -0.5,
+        ),
       ),
+    );
+  }
+
+  /// ===============================
+  /// SECTION LABEL
+  /// ===============================
+  Widget _buildSectionLabel(String text) {
+    return Row(
+      children: [
+        Container(
+          width: 3,
+          height: 12,
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          text.toUpperCase(),
+          style: AppTextStyles.overline10Medium.copyWith(
+            color: AppColors.textPrimary,
+            letterSpacing: 1.5,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 }
 
+/// ===============================
+/// DIVIDER
+/// ===============================
 class _CustomDivider extends StatelessWidget {
   const _CustomDivider();
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -149,6 +213,49 @@ class _CustomDivider extends StatelessWidget {
       child: Divider(
         color: Colors.white.withOpacity(0.05),
         thickness: 1,
+      ),
+    );
+  }
+}
+
+/// ===============================
+/// LIVE DOT
+/// ===============================
+class _LiveDot extends StatefulWidget {
+  @override
+  State<_LiveDot> createState() => _LiveDotState();
+}
+
+class _LiveDotState extends State<_LiveDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _controller,
+      child: Container(
+        width: 8,
+        height: 8,
+        decoration: const BoxDecoration(
+          color: AppColors.success,
+          shape: BoxShape.circle,
+        ),
       ),
     );
   }

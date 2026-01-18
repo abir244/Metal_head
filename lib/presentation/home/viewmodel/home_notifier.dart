@@ -1,35 +1,52 @@
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'home_provider.dart';
 import 'home_state.dart';
-import 'home_repository.dart';
 
-class HomeNotifier extends StateNotifier<HomeState> {
-  final HomeRepository _repo;
-
-  HomeNotifier(this._repo) : super(HomeState.initial()) {
-    loadHome();
+class HomeNotifier extends Notifier<HomeState> {
+  @override
+  HomeState build() {
+    // Fetch data after initialization
+    Future.microtask(() => fetchMatches());
+    return HomeState.initial();
   }
 
-  Future<void> loadHome() async {
+  // Refresh method for pull-to-refresh
+  Future<void> refresh() async {
+    await fetchMatches();
+  }
+
+  Future<void> fetchMatches() async {
+    // Set loading state while preserving existing data
+    state = HomeState(
+      loading: true,
+      upcomingMatches: state.upcomingMatches,
+      matchHistory: state.matchHistory,
+      child: state.child,
+    );
+
     try {
-      state = state.copyWith(loading: true, error: null);
+      final repo = ref.read(homeRepositoryProvider);
 
-      final child = await _repo.fetchChildProfile();
-      final upcoming = await _repo.fetchUpcomingMatches();
-      final history = await _repo.fetchMatchHistory();
+      // Fetch all data
+      final child = await repo.fetchChildProfile();
+      final upcoming = await repo.fetchUpcomingMatches();
+      final history = await repo.fetchMatchHistory();
 
-      state = state.copyWith(
+      // Update state with fetched data
+      state = HomeState(
         loading: false,
         child: child,
         upcomingMatches: upcoming,
         matchHistory: history,
-        error: null,
       );
     } catch (e) {
-      state = state.copyWith(loading: false, error: e.toString());
+      // On error, preserve existing data and stop loading
+      state = HomeState(
+        loading: false,
+        upcomingMatches: state.upcomingMatches,
+        matchHistory: state.matchHistory,
+        child: state.child,
+      );
     }
   }
-
-  void refresh() => loadHome();
 }
-

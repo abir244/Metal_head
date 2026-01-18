@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+// 1. Point this to your MatchModel file
 import '../../model/match_model.dart';
 
 class MatchResultSection extends StatelessWidget {
-  // ID-Free: Pass the whole object to show real team colors
+  // 2. Changed type to MatchModel to match your main screen
   final MatchModel match;
 
   const MatchResultSection({super.key, required this.match});
 
-  /// Helper to get initials
+  /// Helper to get initials (e.g., "Messi" -> "M")
   String _getInitials(String name) {
     if (name.isEmpty) return "";
     List<String> parts = name.trim().split(' ');
@@ -54,7 +55,7 @@ class MatchResultSection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
           decoration: BoxDecoration(
-            color: AppColors.surface, // Depth #121212
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.white.withOpacity(0.03)),
           ),
@@ -64,14 +65,14 @@ class MatchResultSection extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Home Team Avatar
+                  // 3. Home Team Avatar using Real Color from Model
                   _buildTeamAvatar(match.homeTeamName, match.homeColor),
 
-                  // Score Text
+                  // Score Text (Now Dynamic)
                   Column(
                     children: [
                       Text(
-                        "0 - 0",
+                        "${match.homeScore ?? 0} - ${match.awayScore ?? 0}",
                         style: AppTextStyles.heading24Bold.copyWith(
                           fontSize: 32,
                           color: AppColors.primary, // Yellow
@@ -80,22 +81,23 @@ class MatchResultSection extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "FT", // Full Time indicator
+                        "LIVE",
                         style: AppTextStyles.overline10Medium.copyWith(
-                          color: AppColors.textGrey,
+                          color: AppColors.success,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
 
-                  // Away Team Avatar
+                  // 4. Away Team Avatar using Real Color from Model
                   _buildTeamAvatar(match.awayTeamName, match.awayColor),
                 ],
               ),
 
               const SizedBox(height: 24),
 
-              // 3. Stat Row placeholders
+              // Stat Row placeholders
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -118,7 +120,7 @@ class MatchResultSection extends StatelessWidget {
           height: 50,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Color(colorValue),
+            color: Color(colorValue), // Uses the int color from MatchModel
             border: Border.all(color: Colors.white.withOpacity(0.1), width: 2),
           ),
           alignment: Alignment.center,
@@ -139,7 +141,7 @@ class MatchResultSection extends StatelessWidget {
     return Text(
       label,
       style: AppTextStyles.caption12Regular.copyWith(
-        color: AppColors.textGrey,
+        color: AppColors.textSecondary,
         fontWeight: FontWeight.w500,
       ),
     );

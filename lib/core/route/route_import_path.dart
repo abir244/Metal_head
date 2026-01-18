@@ -10,7 +10,7 @@ import '../../presentation/home/view/home_screen.dart';
 import '../../presentation/home/view/widgets/child_profile_card.dart';
 import '../../presentation/main_wrapper.dart';
 import '../../presentation/manager_access/view/manager_access_screen.dart';
-import '../../presentation/match_details/view/match_details_screen.dart';
+import '../../presentation/match_details/view/match_details_screenone.dart';
 import '../../presentation/profile/child_profile/view/child_profile_screen.dart';
 import '../../presentation/voting/view/voting_screen.dart';
 import '../../presentation/voting_rights/view/assign_voting_view.dart';
