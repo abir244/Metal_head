@@ -35,6 +35,12 @@ class AppRouter {
           builder: (_) => const AssignVotingView(),
         );
 
+
+      case RouteName.PlayerProfile:
+        return MaterialPageRoute(
+          builder: (_) => const PlayerProfileScreen(),
+        );
+
     // ---------------- HOME ----------------
       case RouteName.home:
         return MaterialPageRoute(

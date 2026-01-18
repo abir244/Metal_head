@@ -14,6 +14,7 @@ class RouteName {
   static const Wrappernav='/MainWrapper';
   static const managerscreen='/ManagerAccessScreen';
   static const managerdetails='/ MatchDetailsScreen';
+  static const PlayerProfile='/ PlayerProfileScreen';
 
 
 

@@ -17,20 +17,20 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final int? unreadCount;
 
   @override
-  Size get preferredSize => const Size.fromHeight(64); // Slightly taller for breathing room
+  Size get preferredSize => const Size.fromHeight(64);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return AppBar(
       backgroundColor: AppColors.background,
       elevation: 0,
-      scrolledUnderElevation: 0, // Keeps it clean on scroll
+      scrolledUnderElevation: 0,
       automaticallyImplyLeading: false,
       centerTitle: false,
-      titleSpacing: 20, // Better balance from the left edge
+      titleSpacing: 20,
       shape: Border(
         bottom: BorderSide(
-          color: AppColors.textPrimary.withOpacity(0.05), // Subtle "soulful" line
+          color: AppColors.textPrimary.withOpacity(0.05),
           width: 1,
         ),
       ),
@@ -38,12 +38,12 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
         tag: 'app_logo',
         child: Image.asset(
           'assets/images/image6.png',
-          height: 32, // Refined height for better balance
+          height: 32,
           fit: BoxFit.contain,
         ),
       ),
       actions: [
-        // NOTIFICATIONS
+        /// NOTIFICATIONS
         _AppBarAction(
           onTap: onTapNotifications,
           child: Stack(
@@ -68,7 +68,10 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.background, width: 2),
+                      border: Border.all(
+                        color: AppColors.background,
+                        width: 2,
+                      ),
                     ),
                     child: Center(
                       child: Text(
@@ -86,17 +89,17 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
           ),
         ),
 
-        // PROFILE AVATAR
+        /// PROFILE AVATAR
         Padding(
           padding: const EdgeInsets.only(right: 16, left: 8),
           child: GestureDetector(
             onTap: onTapProfile,
             child: Container(
-              padding: const EdgeInsets.all(2), // The "Ring" spacing
+              padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppColors.primary.withOpacity(0.3), // Soulful accent ring
+                  color: AppColors.primary.withOpacity(0.3),
                   width: 1.5,
                 ),
               ),
@@ -116,7 +119,10 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
     if (avatarUrl != null && avatarUrl!.isNotEmpty) {
       return NetworkImage(avatarUrl!);
     }
-    return const AssetImage('assets/images/cr7.png');
+
+    return const NetworkImage(
+      'https://qz.com/cdn-cgi/image/width=1920,quality=85,format=auto/https://assets.qz.com/media/331423b12c7445264e9346deb167c3de.jpg',
+    );
   }
 }
 
@@ -125,18 +131,20 @@ class _AppBarAction extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
 
-  const _AppBarAction({required this.child, this.onTap});
+  const _AppBarAction({
+    required this.child,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
-      child: Container(
+      child: SizedBox(
         width: 44,
         height: 44,
-        alignment: Alignment.center,
-        child: child,
+        child: Center(child: child),
       ),
     );
   }

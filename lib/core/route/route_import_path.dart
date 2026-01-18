@@ -12,6 +12,7 @@ import '../../presentation/main_wrapper.dart';
 import '../../presentation/manager_access/view/manager_access_screen.dart';
 import '../../presentation/match_details/view/match_details_screenone.dart';
 import '../../presentation/profile/child_profile/view/child_profile_screen.dart';
+import '../../presentation/profile/player_profile/view/player_profile_screen.dart';
 import '../../presentation/voting/view/voting_screen.dart';
 import '../../presentation/voting_rights/view/assign_voting_view.dart';
 import 'route_name.dart';

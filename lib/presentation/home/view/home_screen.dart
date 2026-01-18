@@ -6,7 +6,6 @@ import 'package:metalheadd/presentation/home/view/widgets/bottom_navbar.dart'
     hide navbarVisibleProvider;
 
 import '../../../core/constants/app_colors.dart' as app_colors;
-import '../model/child_profile.dart';
 import '../viewmodel/home_provider.dart';
 import '../viewmodel/home_state.dart';
 import 'widgets/home_app_bar.dart';
@@ -27,15 +26,21 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: app_colors.AppColors.background,
-      appBar: const HomeAppBar(
+      appBar: HomeAppBar(
         avatarUrl: _childImageUrl,
+        unreadCount: 3, // TODO: connect to notification provider
+        onTapNotifications: () {
+          debugPrint('Notifications tapped');
+        },
+        onTapProfile: () {
+          Navigator.pushNamed(context, RouteName.PlayerProfile);
+        },
       ),
       body: _buildBody(context, ref, state),
     );
   }
 
   Widget _buildBody(BuildContext context, WidgetRef ref, HomeState state) {
-    // Initial loading (no data yet)
     if (state.loading && state.upcomingMatches.isEmpty) {
       return const Center(
         child: CircularProgressIndicator(color: Colors.blueAccent),
@@ -64,13 +69,11 @@ class HomeScreen extends ConsumerWidget {
             children: [
               if (state.child != null)
                 ChildProfileCard(
-                  child: state.child!, // ✅ USE EXISTING MODEL
+                  child: state.child!,
                   showTitle: true,
                   padding: const EdgeInsets.all(12),
                   avatarRadius: 40,
                 ),
-
-
 
               const SizedBox(height: 24),
 

@@ -5,7 +5,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../home/view/widgets/bottom_navbar.dart';
 
-
 class PlayerScreen extends ConsumerStatefulWidget {
   const PlayerScreen({super.key});
 
@@ -14,14 +13,25 @@ class PlayerScreen extends ConsumerStatefulWidget {
 }
 
 class _PlayerScreenState extends ConsumerState<PlayerScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    /// 🔽 Hide bottom navbar when entering PlayerScreen
+    Future.microtask(() {
+      ref.read(navbarVisibleProvider.notifier).state = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // 🔙 Back button → Home tab
+        /// 🔙 Back → Home tab + show navbar
         ref.read(navigationProvider.notifier).updateIndex(0);
         ref.read(navbarVisibleProvider.notifier).state = true;
-        return false; // prevent app exit
+        return false;
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
@@ -52,7 +62,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 const SizedBox(height: 12),
                 _buildPlayerOfMatchCard(
                   playerNumber: '10',
-                  playerName: 'Jude \n Belingham',
+                  playerName: 'Jude \nBellingham',
                   score: '0-3',
                   imageUrl:
                   'https://assets.laliga.com/assets/2024/12/27/large/c5b5b7a3480baf01b31091d038f3f16f.jpeg',
@@ -63,8 +73,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 _buildSectionTitle('Yesterday Player of the Match'),
                 const SizedBox(height: 12),
                 _buildPlayerOfMatchCard(
-                  playerNumber: '10',
-                  playerName: 'Lamine \n Yamal',
+                  playerNumber: '27',
+                  playerName: 'Lamine \nYamal',
                   score: '0-2',
                   imageUrl:
                   'https://assets.laliga.com/assets/2024/09/09/large/7d1fd6926895af60e0b19da2e0c025e9.jpeg',
@@ -111,7 +121,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   }) {
     return Container(
       height: 220,
-      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -126,10 +135,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       child: Stack(
         children: [
           Positioned.fill(
-            child: Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-            ),
+            child: Image.network(imageUrl, fit: BoxFit.cover),
           ),
           Positioned.fill(
             child: Container(
@@ -138,8 +144,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.25),
-                    Colors.black.withOpacity(0.65),
+                    Colors.black.withOpacity(0.3),
+                    Colors.black.withOpacity(0.7),
                   ],
                 ),
               ),
@@ -157,57 +163,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                     style: AppTextStyles.heading24Bold.copyWith(
                       fontSize: 80,
                       color: Colors.white,
-                      height: 1,
                     ),
-                  ),
-                ),
-                Positioned(
-                  right: 90,
-                  top: 40,
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.25),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.emoji_events,
-                      size: 40,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.45),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          score,
-                          style: AppTextStyles.body16SemiBold.copyWith(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          _buildTeamLogo(homeTeamLogo),
-                          const SizedBox(width: 8),
-                          _buildTeamLogo(awayTeamLogo),
-                        ],
-                      ),
-                    ],
                   ),
                 ),
                 Positioned(
@@ -222,7 +178,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                           color: Colors.white70,
                         ),
                       ),
-                      const SizedBox(height: 4),
                       Text(
                         playerName,
                         style: AppTextStyles.heading20SemiBold.copyWith(
@@ -237,18 +192,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildTeamLogo(IconData icon) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(icon, size: 18, color: Colors.white),
     );
   }
 
@@ -287,7 +230,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
               const SizedBox(height: 8),
               Text(stat['value'] as String,
                   style: AppTextStyles.heading20SemiBold),
-              const SizedBox(height: 4),
               Text(stat['label'] as String,
                   style: AppTextStyles.caption12Regular),
             ],
