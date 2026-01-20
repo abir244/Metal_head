@@ -19,69 +19,52 @@ class MainWrapper extends ConsumerStatefulWidget {
 class _MainWrapperState extends ConsumerState<MainWrapper> {
   final PageStorageBucket _bucket = PageStorageBucket();
 
-  late final List<Widget> _pages;
-
-  @override
-  void initState() {
-    super.initState();
-    _pages = const [
-      HomeScreen(),          // 0
-      ChildProfileScreen(),  // 1
-      VotingScreen(),        // 2
-      ManagerAccessScreen(), // 3
-      PlayerScreen(),        // 4
-    ];
-  }
+  // Define pages here. Note: If these screens have their own Scaffolds,
+  // ensure they have 'resizeToAvoidBottomInset: false'
+  final List<Widget> _pages = const [
+    HomeScreen(),          // 0
+    ChildProfileScreen(),  // 1
+    VotingScreen(),        // 2
+    ManagerAccessScreen(), // 3
+    PlayerScreen(),        // 4
+  ];
 
   @override
   Widget build(BuildContext context) {
     final int currentIndex = ref.watch(navigationProvider);
     final bool isNavbarVisible = ref.watch(navbarVisibleProvider);
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: currentIndex == 0, // Only exit app if on Home tab
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+
+        // If not on Home, go back to Home index
         if (currentIndex != 0) {
-          // 👈 Go back to Home instead of closing app
           ref.read(navigationProvider.notifier).updateIndex(0);
           ref.read(navbarVisibleProvider.notifier).state = true;
-          return false;
         }
-        return true; // allow app exit on Home tab
       },
       child: Scaffold(
+        // extendBody allows the body to flow behind the navbar (useful for transparency/blur)
         extendBody: true,
         backgroundColor: Colors.black,
-        body: Stack(
-          children: [
-            /// Pages
-            PageStorage(
-              bucket: _bucket,
-              child: IndexedStack(
-                index: currentIndex,
-                children: _pages.map((page) {
-                  return SafeArea(
-                    top: true,
-                    bottom: false,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 80),
-                      child: page,
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
 
-            /// Bottom Navbar
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: AnimatedSlide(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                offset: isNavbarVisible ? Offset.zero : const Offset(0, 1),
-                child: const CustomBottomNavBar(),
-              ),
-            ),
-          ],
+        // Using IndexedStack to preserve the state of each page
+        body: PageStorage(
+          bucket: _bucket,
+          child: IndexedStack(
+            index: currentIndex,
+            children: _pages,
+          ),
+        ),
+
+        // Better way to handle the Navbar: use the dedicated slot
+        bottomNavigationBar: AnimatedSlide(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          offset: isNavbarVisible ? Offset.zero : const Offset(0, 1),
+          child: const CustomBottomNavBar(),
         ),
       ),
     );

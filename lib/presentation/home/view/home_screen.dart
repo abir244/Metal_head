@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:metalheadd/core/route/route_name.dart';
-import 'package:metalheadd/presentation/home/view/widgets/bottom_navbar.dart'
-    hide navbarVisibleProvider;
+
+/// FIX 1: Removed 'hide navbarVisibleProvider'.
+/// We need this provider to communicate with the MainWrapper.
+import 'package:metalheadd/presentation/home/view/widgets/bottom_navbar.dart';
 
 import '../../../core/constants/app_colors.dart' as app_colors;
-import '../viewmodel/home_provider.dart';
+import '../viewmodel/home_provider.dart' hide navbarVisibleProvider;
 import '../viewmodel/home_state.dart';
 import 'widgets/home_app_bar.dart';
 import 'widgets/child_profile_card.dart';
@@ -24,46 +26,54 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(homeProvider);
 
-    return Scaffold(
-      backgroundColor: app_colors.AppColors.background,
-      appBar: HomeAppBar(
-        avatarUrl: _childImageUrl,
-        unreadCount: 3, // TODO: connect to notification provider
-        onTapNotifications: () {
-          debugPrint('Notifications tapped');
-        },
-        onTapProfile: () {
-          Navigator.pushNamed(context, RouteName.PlayerProfile);
-        },
-      ),
-      body: _buildBody(context, ref, state),
+    /// FIX 2: Removed 'Scaffold'.
+    /// Using a Scaffold here creates a new layer that covers the MainWrapper's Navbar.
+    /// We use a Column + Expanded to keep the AppBar at the top and body below.
+    return Column(
+      children: [
+        HomeAppBar(
+          avatarUrl: _childImageUrl,
+          unreadCount: 3,
+          onTapNotifications: () => debugPrint('Notifications tapped'),
+          onTapProfile: () => Navigator.pushNamed(context, RouteName.PlayerProfile),
+        ),
+        Expanded(
+          child: _buildBody(context, ref, state),
+        ),
+      ],
     );
   }
 
   Widget _buildBody(BuildContext context, WidgetRef ref, HomeState state) {
     if (state.loading && state.upcomingMatches.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(color: Colors.blueAccent),
-      );
+      return const Center(child: CircularProgressIndicator(color: Colors.blueAccent));
     }
 
     return NotificationListener<UserScrollNotification>(
       onNotification: (notification) {
+        /// FIX 3: Corrected the Provider access.
+        /// Now that the import is fixed, this correctly hides/shows the navbar in MainWrapper.
         if (notification.direction == ScrollDirection.reverse) {
-          ref.read(navbarVisibleProvider.notifier).state = false;
+          if (ref.read(navbarVisibleProvider)) {
+            ref.read(navbarVisibleProvider.notifier).state = false;
+          }
         } else if (notification.direction == ScrollDirection.forward) {
-          ref.read(navbarVisibleProvider.notifier).state = true;
+          if (!ref.read(navbarVisibleProvider)) {
+            ref.read(navbarVisibleProvider.notifier).state = true;
+          }
         }
         return true;
       },
       child: RefreshIndicator(
         onRefresh: () async => ref.read(homeProvider.notifier).refresh(),
         color: app_colors.AppColors.primary,
-        backgroundColor: app_colors.AppColors.surface,
         child: SingleChildScrollView(
           key: const PageStorageKey('home_scroll_key'),
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          /// FIX 4: Bottom padding (120) is essential.
+          /// This ensures that the last item in the list can be scrolled high enough
+          /// so it isn't blocked by the floating navbar.
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 120),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -78,8 +88,7 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: 24),
 
               VoteBanner(
-                onPressed: () =>
-                    Navigator.pushNamed(context, RouteName.votingrights),
+                onPressed: () => Navigator.pushNamed(context, RouteName.votingrights),
               ),
 
               const SizedBox(height: 24),
@@ -90,15 +99,9 @@ class HomeScreen extends ConsumerWidget {
                   child: GestureDetector(
                     onTap: () {
                       final matchId = state.upcomingMatches.first.id;
-                      Navigator.pushNamed(
-                        context,
-                        RouteName.matchdetails,
-                        arguments: matchId,
-                      );
+                      Navigator.pushNamed(context, RouteName.matchdetails, arguments: matchId);
                     },
-                    child: UpcomingMatchCard(
-                      match: state.upcomingMatches.first,
-                    ),
+                    child: UpcomingMatchCard(match: state.upcomingMatches.first),
                   ),
                 ),
 
@@ -111,8 +114,6 @@ class HomeScreen extends ConsumerWidget {
                   matchHistory: state.matchHistory,
                 ),
               ),
-
-              const SizedBox(height: 100),
             ],
           ),
         ),
@@ -120,10 +121,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSection({
-    required String title,
-    required Widget child,
-  }) {
+  Widget _buildSection({required String title, required Widget child}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -132,7 +130,6 @@ class HomeScreen extends ConsumerWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
             color: app_colors.AppColors.textWhite,
           ),
         ),
