@@ -1,8 +1,9 @@
+
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart' as app_colors;
 
 /// Lightweight CTA banner using only Container/Row/InkWell with AppColors.
-/// Layout: [ trophy ] Player of the Match                       [ Vote Now ]
+/// Layout: [ trophy ] Player of the Match [ Vote Now ]
 class VoteBanner extends StatelessWidget {
   const VoteBanner({
     super.key,
@@ -13,6 +14,7 @@ class VoteBanner extends StatelessWidget {
     this.cornerRadius = 12,
     this.horizontalPadding = 16,
     this.verticalPadding = 10,
+    // No more required background/text colors; we use app defaults.
   });
 
   final String title;
@@ -25,10 +27,14 @@ class VoteBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Local defaults for styling
+    const Color titleColor = app_colors.AppColors.textPrimary; // white
+    const Color cardColor  = app_colors.AppColors.surface;     // dark card
+
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: app_colors.AppColors.surface, // dark card background
+        color: cardColor,
         borderRadius: BorderRadius.circular(cornerRadius),
       ),
       padding: EdgeInsets.symmetric(
@@ -37,24 +43,22 @@ class VoteBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Trophy icon bubble – subtle on dark
+          // Trophy icon bubble
           Container(
             width: 28,
             height: 28,
             decoration: const BoxDecoration(
-              color: app_colors.AppColors.divider, // subtle circle
+              color: app_colors.AppColors.divider,
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
             child: const Icon(
               Icons.emoji_events_rounded,
               size: 18,
-              color: app_colors.AppColors.textPrimary, // white icon
+              color: app_colors.AppColors.textPrimary,
             ),
           ),
-
           const SizedBox(width: 12),
-
           // Title
           Expanded(
             child: Text(
@@ -62,16 +66,14 @@ class VoteBanner extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                color: app_colors.AppColors.textPrimary, // white text
+                color: titleColor,
                 fontWeight: FontWeight.w600,
-                fontSize: 14, // compact; bump to 16 if you prefer
+                fontSize: 14,
               ),
             ),
           ),
-
           const SizedBox(width: 12),
-
-          // Pill button (primary yellow) – minimal layers
+          // Pill button
           _PillButton(
             text: buttonText,
             onPressed: onPressed,
@@ -86,34 +88,35 @@ class VoteBanner extends StatelessWidget {
 /// Uses only Container + InkWell for a light build.
 class _PillButton extends StatelessWidget {
   const _PillButton({required this.text, this.onPressed});
-
   final String text;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    // InkWell here is light; no extra Material layer needed on dark cards.
     return InkWell(
-      onTap: onPressed,
+      onTap: onPressed, // null = disabled (non-interactive)
       borderRadius: BorderRadius.circular(999),
-      splashColor: Colors.transparent,   // clean look on dark surfaces
-      highlightColor: Colors.transparent, // we’ll handle press with color swap below
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
       child: _Pressable(
-        builder: (pressed) => Container(
-          decoration: BoxDecoration(
-            color: pressed
-                ? app_colors.AppColors.primaryDark // pressed state
-                : app_colors.AppColors.textThird,     // normal
-            borderRadius: BorderRadius.circular(999),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Text(
-            text,
-            style: const TextStyle(
-              color: app_colors.AppColors.inputText, // black on yellow
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
-              height: 1.1,
+        builder: (pressed) => Opacity(
+          // Subtle visual for disabled state if onPressed == null
+          opacity: onPressed == null ? 0.6 : 1.0,
+          child: Container(
+            decoration: BoxDecoration(
+              color: pressed
+                  ? app_colors.AppColors.primaryDark
+                  : app_colors.AppColors.textThird,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            child: const Text(
+              // Using const Text since style doesn't vary with state
+              // (except color, which is constant here).
+              // If you want to dim text for disabled state, remove const and vary style.
+              // For now, keep it simple and performant.
+              // Also: AppColors.inputText works as black-on-yellow.
+              '',
             ),
           ),
         ),
@@ -123,7 +126,6 @@ class _PillButton extends StatelessWidget {
 }
 
 /// Ultra-light press detector without Material/Focus overhead.
-/// It toggles `pressed` during pointer down/up to let us change colors.
 class _Pressable extends StatefulWidget {
   const _Pressable({required this.builder});
   final Widget Function(bool pressed) builder;

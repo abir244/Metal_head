@@ -4,6 +4,9 @@ import 'package:metalheadd/core/constants/app_colors.dart';
 import 'package:metalheadd/core/theme/app_text_styles.dart';
 import 'package:metalheadd/presentation/home/model/child_profile.dart';
 
+import '../../../../core/theme/theme_provider.dart';
+
+
 class ChildProfileCard extends ConsumerWidget {
   const ChildProfileCard({
     super.key,
@@ -22,6 +25,15 @@ class ChildProfileCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDarkMode = ref.watch(themeProvider);
+
+    // Dynamic colors
+    final bgColor = isDarkMode ? const Color(0xFF1A1A1A) : Colors.white;
+    final borderColor = isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.3);
+    final titleColor = isDarkMode ? Colors.white : Colors.black87;
+    final subtitleColor = isDarkMode ? Colors.white70 : Colors.black54;
+    final avatarBgColor = isDarkMode ? Colors.grey[800]! : Colors.grey[200]!;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final w = constraints.maxWidth;
@@ -29,22 +41,22 @@ class ChildProfileCard extends ConsumerWidget {
 
         final labelStyle = AppTextStyles.body14Regular.copyWith(
           fontSize: isNarrow ? 12 : 13,
-          color: AppColors.textSecondary.withOpacity(0.8),
+          color: subtitleColor.withOpacity(0.8),
           fontWeight: FontWeight.w500,
         );
 
         final valueStyle = AppTextStyles.body14Regular.copyWith(
           fontSize: isNarrow ? 13 : 14,
-          color: AppColors.textPrimary,
+          color: titleColor,
           fontWeight: FontWeight.w700,
         );
 
         return Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: bgColor,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.divider.withOpacity(0.5)),
+            border: Border.all(color: borderColor),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,6 +72,7 @@ class ChildProfileCard extends ConsumerWidget {
                           "Child Profile",
                           style: AppTextStyles.body14Regular.copyWith(
                             fontWeight: FontWeight.w800,
+                            color: titleColor,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -80,16 +93,24 @@ class ChildProfileCard extends ConsumerWidget {
                 const SizedBox(height: 16),
               ],
 
+              // Layout adapts to narrow or normal width
               if (isNarrow)
                 Column(
                   children: [
-                    _AvatarBlock(child: child, radius: avatarRadius),
+                    _AvatarBlock(
+                      child: child,
+                      radius: avatarRadius,
+                      avatarBgColor: avatarBgColor,
+                      titleColor: titleColor,
+                      subtitleColor: subtitleColor,
+                    ),
                     const SizedBox(height: 20),
                     _DefinitionList(
                       child: child,
                       labelStyle: labelStyle,
                       valueStyle: valueStyle,
                       fullView: fullView,
+                      isDarkMode: isDarkMode,
                     ),
                   ],
                 )
@@ -98,7 +119,13 @@ class ChildProfileCard extends ConsumerWidget {
                   children: [
                     Expanded(
                       flex: 2,
-                      child: _AvatarBlock(child: child, radius: avatarRadius),
+                      child: _AvatarBlock(
+                        child: child,
+                        radius: avatarRadius,
+                        avatarBgColor: avatarBgColor,
+                        titleColor: titleColor,
+                        subtitleColor: subtitleColor,
+                      ),
                     ),
                     const SizedBox(width: 20),
                     Expanded(
@@ -108,6 +135,7 @@ class ChildProfileCard extends ConsumerWidget {
                         labelStyle: labelStyle,
                         valueStyle: valueStyle,
                         fullView: fullView,
+                        isDarkMode: isDarkMode,
                       ),
                     ),
                   ],
@@ -121,10 +149,19 @@ class ChildProfileCard extends ConsumerWidget {
 }
 
 class _AvatarBlock extends StatelessWidget {
-  const _AvatarBlock({required this.child, required this.radius});
+  const _AvatarBlock({
+    required this.child,
+    required this.radius,
+    required this.avatarBgColor,
+    required this.titleColor,
+    required this.subtitleColor,
+  });
 
   final ChildProfile child;
   final double radius;
+  final Color avatarBgColor;
+  final Color titleColor;
+  final Color subtitleColor;
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +171,7 @@ class _AvatarBlock extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: radius,
-              backgroundColor: AppColors.surfaceDark,
+              backgroundColor: avatarBgColor,
               foregroundImage: _avatarProvider(child.imageUrl),
               onForegroundImageError: (_, __) {},
             ),
@@ -147,7 +184,7 @@ class _AvatarBlock extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.success,
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.surface, width: 2),
+                  border: Border.all(color: avatarBgColor, width: 2),
                 ),
               ),
             ),
@@ -158,12 +195,13 @@ class _AvatarBlock extends StatelessWidget {
           child.name,
           style: AppTextStyles.body14Regular.copyWith(
             fontWeight: FontWeight.w700,
+            color: titleColor,
           ),
         ),
         Text(
           child.school,
           style: AppTextStyles.label12Medium.copyWith(
-            color: AppColors.textMuted,
+            color: subtitleColor,
           ),
         ),
       ],
@@ -172,10 +210,7 @@ class _AvatarBlock extends StatelessWidget {
 
   ImageProvider _avatarProvider(String? url) {
     if (url != null && url.trim().isNotEmpty) {
-      if (url.startsWith('http')) {
-        return NetworkImage(url);
-      }
-      return AssetImage(url);
+      return url.startsWith('http') ? NetworkImage(url) : AssetImage(url);
     }
     return const AssetImage('assets/images/cr7.png');
   }
@@ -187,12 +222,14 @@ class _DefinitionList extends StatelessWidget {
     required this.labelStyle,
     required this.valueStyle,
     this.fullView = false,
+    required this.isDarkMode,
   });
 
   final ChildProfile child;
   final TextStyle labelStyle;
   final TextStyle valueStyle;
   final bool fullView;
+  final bool isDarkMode;
 
   @override
   Widget build(BuildContext context) {
@@ -216,7 +253,7 @@ class _DefinitionList extends StatelessWidget {
         _BaselineRow(
           label: 'Status',
           labelStyle: labelStyle,
-          valueWidget: const _StatusPill(text: 'Active'),
+          valueWidget: _StatusPill(isDarkMode: isDarkMode, text: 'Active'),
           valueStyle: valueStyle,
         ),
       ],
@@ -240,36 +277,40 @@ class _BaselineRow extends StatelessWidget {
   final TextStyle valueStyle;
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(label, style: labelStyle),
-        const SizedBox(width: 8),
-        Expanded(child: Divider(color: AppColors.divider.withOpacity(0.4))),
-        const SizedBox(width: 8),
-        valueWidget ?? Text(value!, style: valueStyle),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Row(
+    children: [
+      Text(label, style: labelStyle),
+      const SizedBox(width: 8),
+      Expanded(child: Divider(color: AppColors.divider.withOpacity(0.4))),
+      const SizedBox(width: 8),
+      valueWidget ?? (value != null ? Text(value!, style: valueStyle) : const SizedBox()),
+    ],
+  );
 }
 
 class _StatusPill extends StatelessWidget {
-  const _StatusPill({required this.text});
+  const _StatusPill({
+    required this.text,
+    required this.isDarkMode,
+  });
+
   final String text;
+  final bool isDarkMode;
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = isDarkMode ? Colors.green.withOpacity(0.2) : AppColors.success.withOpacity(0.1);
+    final textColor = AppColors.success;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.1),
+        color: bgColor,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         text.toUpperCase(),
-        style: AppTextStyles.badge12SemiBold.copyWith(
-          color: AppColors.success,
-        ),
+        style: AppTextStyles.badge12SemiBold.copyWith(color: textColor),
       ),
     );
   }

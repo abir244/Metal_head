@@ -1,7 +1,9 @@
+// lib/presentation/child_profile/view/child_profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/theme_provider.dart';
 import '../../../home/view/widgets/child_profile_card.dart';
 import '../../../home/view/widgets/upcoming_match_card.dart';
 import '../../../home/view/widgets/bottom_navbar.dart';
@@ -15,9 +17,16 @@ class ChildProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(childProfileProvider);
     final matchesAsync = ref.watch(upcomingMatchesProvider);
+    final isDarkMode = ref.watch(themeProvider);
+
+    // Dynamic colors based on theme
+    final bgColor = isDarkMode ? Colors.black : Colors.grey[100]!;
+    final cardColor = isDarkMode ? const Color(0xFF1A1A1A) : Colors.white;
+    final titleColor = isDarkMode ? Colors.white : Colors.black87;
+    final subtitleColor = isDarkMode ? Colors.white70 : Colors.black54;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: bgColor,
       body: SafeArea(
         child: NotificationListener<UserScrollNotification>(
           onNotification: (notification) {
@@ -29,8 +38,10 @@ class ChildProfileScreen extends ConsumerWidget {
             return true;
           },
           child: profileAsync.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: Colors.white),
+            loading: () => Center(
+              child: CircularProgressIndicator(
+                color: titleColor,
+              ),
             ),
             error: (e, _) => Center(
               child: Text(
@@ -47,18 +58,18 @@ class ChildProfileScreen extends ConsumerWidget {
                   children: [
                     const SizedBox(height: 10),
 
-                    const Text(
+                    // Screen title
+                    Text(
                       "Child Profile",
                       style: TextStyle(
-                        color: Colors.white,
+                        color: titleColor,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
                     const SizedBox(height: 20),
 
-                    /// PROFILE CARD
+                    // Profile Card
                     ChildProfileCard(
                       child: profile,
                       showTitle: true,
@@ -66,40 +77,45 @@ class ChildProfileScreen extends ConsumerWidget {
                       fullView: true,
                     ),
 
-                    /// PARENT INFO
-                    buildInfoSection("Parent Info", [
-                      InfoRow("Name", profile.parent.name),
-                      InfoRow("Email", profile.parent.email),
-                      InfoRow("Phone", profile.parent.phone),
-                    ]),
 
-                    /// PERFORMANCE STATS
-                    buildInfoSection("Performance", [
-                      InfoRow("Matches", profile.stats.matches.toString()),
-                      InfoRow("Goals", profile.stats.goals.toString()),
-                      InfoRow("Assists", profile.stats.assists.toString()),
-                      InfoRow("POTM", profile.stats.potm.toString()),
-                      InfoRow("Attendance", profile.stats.attendance),
-                    ]),
+                    // Parent Info
+                    buildInfoSection(
+                      "Parent Info",
+                      [
+                        InfoRow("Name", profile.parent.name, titleColor, subtitleColor),
+                        InfoRow("Email", profile.parent.email, titleColor, subtitleColor),
+                        InfoRow("Phone", profile.parent.phone, titleColor, subtitleColor),
+                      ],
+                      cardColor: cardColor,
+                    ),
 
-                    /// UPCOMING MATCHES
+                    // Performance Stats
+                    buildInfoSection(
+                      "Performance",
+                      [
+                        InfoRow("Matches", profile.stats.matches.toString(), titleColor, subtitleColor),
+                        InfoRow("Goals", profile.stats.goals.toString(), titleColor, subtitleColor),
+                        InfoRow("Assists", profile.stats.assists.toString(), titleColor, subtitleColor),
+                        InfoRow("POTM", profile.stats.potm.toString(), titleColor, subtitleColor),
+                        InfoRow("Attendance", profile.stats.attendance, titleColor, subtitleColor),
+                      ],
+                      cardColor: cardColor,
+                    ),
+
+                    // Upcoming Matches
                     matchesAsync.when(
                       loading: () => const SizedBox.shrink(),
                       error: (_, __) => const SizedBox.shrink(),
                       data: (matches) {
-                        if (matches.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
-
+                        if (matches.isEmpty) return const SizedBox.shrink();
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SectionTitle("Upcoming Matches"),
+                            SectionTitle("Upcoming Matches", titleColor: titleColor),
                             ...matches.map(
                                   (m) => Padding(
-                                padding:
-                                const EdgeInsets.only(bottom: 12),
-                                child: UpcomingMatchCard(match: m),
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: UpcomingMatchCard(match: m, isDarkMode: isDarkMode),
                               ),
                             ),
                           ],
@@ -125,43 +141,45 @@ class ChildProfileScreen extends ConsumerWidget {
 // =======================
 //
 
-Widget buildInfoSection(String title, List<Widget> rows) {
+Widget buildInfoSection(String title, List<InfoRow> rows, {required Color cardColor}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      SectionTitle(title),
-      InfoCard(rows),
+      SectionTitle(title, titleColor: rows.first.labelColor),
+      InfoCard(rows, cardColor: cardColor),
     ],
   );
 }
 
 class SectionTitle extends StatelessWidget {
   final String title;
-  const SectionTitle(this.title, {super.key});
+  final Color? titleColor;
+  const SectionTitle(this.title, {this.titleColor, super.key});
 
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(top: 24, bottom: 12),
     child: Text(
       title,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 18,
+      style: TextStyle(
+        color: titleColor ?? Theme.of(context).textTheme.titleLarge?.color,
         fontWeight: FontWeight.bold,
+        fontSize: 18,
       ),
     ),
   );
 }
 
 class InfoCard extends StatelessWidget {
-  final List<Widget> children;
-  const InfoCard(this.children, {super.key});
+  final List<InfoRow> children;
+  final Color cardColor;
+  const InfoCard(this.children, {required this.cardColor, super.key});
 
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      color: const Color(0xFF111111),
+      color: cardColor,
       borderRadius: BorderRadius.circular(16),
     ),
     child: Column(children: children),
@@ -171,12 +189,14 @@ class InfoCard extends StatelessWidget {
 class InfoRow extends StatelessWidget {
   final String label;
   final String value;
-  final bool hasIcon;
+  final Color labelColor;
+  final Color valueColor;
 
   const InfoRow(
       this.label,
-      this.value, {
-        this.hasIcon = false,
+      this.value,
+      this.labelColor,
+      this.valueColor, {
         super.key,
       });
 
@@ -189,28 +209,22 @@ class InfoRow extends StatelessWidget {
           width: 130,
           child: Text(
             label,
-            style: const TextStyle(
-              color: Colors.grey,
+            style: TextStyle(
+              color: labelColor,
               fontSize: 13,
             ),
           ),
         ),
-        const Text(":  ", style: TextStyle(color: Colors.grey)),
+        Text(":  ", style: TextStyle(color: labelColor)),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: valueColor,
               fontSize: 14,
             ),
           ),
         ),
-        if (hasIcon)
-          const Icon(
-            Icons.sports_soccer,
-            size: 16,
-            color: Colors.white54,
-          ),
       ],
     ),
   );

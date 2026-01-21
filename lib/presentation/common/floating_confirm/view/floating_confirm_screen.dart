@@ -5,27 +5,34 @@ import 'package:metalheadd/core/constants/app_colors.dart';
 import '../viewmodel/floating_confirm_provider.dart';
 
 class FloatingConfirmScreen extends ConsumerWidget {
+  final String title;
+  final String message;
+  final VoidCallback onConfirm;
+  final bool isDarkMode; // ✅ Add this
+
   const FloatingConfirmScreen({
     super.key,
     required this.title,
     required this.message,
     required this.onConfirm,
+    required this.isDarkMode, // ✅ Make required
   });
-
-  final String title;
-  final String message;
-  final VoidCallback onConfirm;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final bgOverlayColor = Colors.black.withOpacity(0.55);
+    final cardColor = isDarkMode ? const Color(0xFF1A1A1A) : Colors.white;
+    final titleColor = isDarkMode ? Colors.white : Colors.black87;
+    final messageColor = isDarkMode ? Colors.white70 : Colors.black54;
+
     return Material(
-      color: AppColors.inputText.withOpacity(0.55),
+      color: bgOverlayColor,
       child: Center(
         child: Container(
           width: MediaQuery.of(context).size.width * 0.85,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            color: cardColor,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -33,7 +40,11 @@ class FloatingConfirmScreen extends ConsumerWidget {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.titleLarge,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: titleColor,
+                ),
               ),
 
               const SizedBox(height: 12),
@@ -41,6 +52,7 @@ class FloatingConfirmScreen extends ConsumerWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
+                style: TextStyle(color: messageColor),
               ),
 
               const SizedBox(height: 24),
@@ -49,11 +61,14 @@ class FloatingConfirmScreen extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: isDarkMode ? Colors.white : Colors.black87,
+                        side: BorderSide(
+                          color: isDarkMode ? Colors.white38 : Colors.black38,
+                        ),
+                      ),
                       onPressed: () {
-                        ref
-                            .read(floatingConfirmProvider
-                            .notifier)
-                            .state = false;
+                        ref.read(floatingConfirmProvider.notifier).state = false;
                       },
                       child: const Text('Cancel'),
                     ),
@@ -63,11 +78,12 @@ class FloatingConfirmScreen extends ConsumerWidget {
 
                   Expanded(
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.black,
+                      ),
                       onPressed: () {
-                        ref
-                            .read(floatingConfirmProvider
-                            .notifier)
-                            .state = false;
+                        ref.read(floatingConfirmProvider.notifier).state = false;
                         onConfirm();
                       },
                       child: const Text('Confirm'),

@@ -1,5 +1,3 @@
-// lib/presentation/home/view/widgets/upcoming_match_card.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -11,13 +9,13 @@ class UpcomingMatchCard extends ConsumerWidget {
     super.key,
     required this.match,
     this.onTap,
+    required this.isDarkMode, // ✅ Add dark mode flag
   });
 
   final Match match;
   final VoidCallback? onTap;
+  final bool isDarkMode;
 
-  /// 🔹 UPDATED TEAM → IMAGE MAP
-  /// Added Liverpool and Chelsea to match your Figma design
   static const Map<String, String> _teamImages = {
     'Barcelona': 'barca.png',
     'Chelsea': 'chelsea.png',
@@ -25,83 +23,80 @@ class UpcomingMatchCard extends ConsumerWidget {
     'Manchester United': 'manutd.png',
     'Manchester City': 'mancity.png',
     'Nottingham Forest': 'forest.png',
-    'FCB': 'barca.png', // Added shortnames for robustness
+    'FCB': 'barca.png',
   };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dateStr =
-        '${match.startDate.day.toString().padLeft(2, '0')} '
-        '${_month(match.startDate.month)} '
-        '${match.startDate.year}';
-
+        '${match.startDate.day.toString().padLeft(2, '0')} ${_month(match.startDate.month)} ${match.startDate.year}';
     final timeStr = _formatTime(match.startDate);
+
+    final bgGradient = isDarkMode
+        ? LinearGradient(
+      colors: [Color(0xFF1E1E1E), AppColors.surface.withOpacity(0.2)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    )
+        : LinearGradient(
+      colors: [Colors.white, Colors.grey[200]!],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+
+    final vsBgColor = isDarkMode ? AppColors.primary : Colors.yellow.shade600;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final subtitleColor = isDarkMode ? Colors.white70 : Colors.black54;
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16), // Slightly rounder to match Figma cards
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          // Using a solid dark color or a more subtle gradient to match the Figma theme
-          gradient: LinearGradient(
-            colors: [
-              const Color(0xFF1E1E1E), // Darker start
-              AppColors.primary.withOpacity(0.2), // Faded primary color (Yellow/Blue)
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          border: Border.all(color: Colors.white.withOpacity(0.05)),
+          gradient: bgGradient,
+          border: Border.all(color: Colors.black.withOpacity(0.05)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // HOME TEAM LOGO
             _teamLogo(match.homeTeam.name),
-
-            /// CENTER INFO
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    dateStr,
-                    style: AppTextStyles.body14Regular.copyWith(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  Text(dateStr,
+                      style: AppTextStyles.body14Regular.copyWith(
+                        color: subtitleColor,
+                        fontWeight: FontWeight.w500,
+                      )),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.primary, // Using the yellow/primary as the VS background
+                      color: vsBgColor,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text(
+                    child: Text(
                       'VS',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: isDarkMode ? Colors.black : Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    timeStr,
-                    style: AppTextStyles.body14Regular.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  Text(timeStr,
+                      style: AppTextStyles.body14Regular.copyWith(
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                      )),
                 ],
               ),
             ),
-
-            // AWAY TEAM LOGO
             _teamLogo(match.awayTeam.name),
           ],
         ),
@@ -109,282 +104,32 @@ class UpcomingMatchCard extends ConsumerWidget {
     );
   }
 
-  /// 🔹 UPDATED TEAM LOGO WIDGET
   Widget _teamLogo(String teamName) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // If team is not found, it defaults to 'mancity.png'
     final imageName = _teamImages[teamName] ?? 'mancity.png';
+    final bgColor = isDarkMode ? Colors.white12 : Colors.black12;
 
     return Column(
       children: [
         CircleAvatar(
-          radius: 26, // Slightly larger for better visibility
-          backgroundColor: Colors.white.withOpacity(0.1),
+          radius: 26,
+          backgroundColor: bgColor,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Image.asset(
               'assets/images/$imageName',
               errorBuilder: (context, error, stackTrace) =>
-                  Image.asset('assets/images/mancity.png'), // Ultimate fallback
+                  Image.asset('assets/images/mancity.png'),
             ),
           ),
         ),
         const SizedBox(height: 8),
         Text(
           teamName,
-          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black87,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
         )
       ],
     );
@@ -399,8 +144,18 @@ class UpcomingMatchCard extends ConsumerWidget {
 
   String _month(int m) {
     const names = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     return names[m - 1];
   }

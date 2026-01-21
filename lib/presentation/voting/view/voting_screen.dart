@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:metalheadd/core/constants/app_colors.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../home/view/widgets/bottom_navbar.dart';
 
 import '../viewmodel/voting_provider.dart';
@@ -18,19 +19,24 @@ class VotingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final matchId = 'default_match_id';
-
     final state = ref.watch(votingProvider(matchId));
     final showFloating = ref.watch(floatingConfirmProvider);
+    final isDarkMode = ref.watch(themeProvider);
+
+    // Dynamic colors
+    final bgColor = isDarkMode ? Colors.black : Colors.grey[100]!;
+    final headerBgColor = isDarkMode ? const Color(0xFF242424) : Colors.grey[300]!;
+    final cardBgColor = isDarkMode ? const Color(0xFF1A1A1A) : Colors.white;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final subTextColor = isDarkMode ? Colors.white70 : Colors.black54;
+    final headerTextColor = isDarkMode ? Colors.white.withOpacity(0.4) : Colors.black.withOpacity(0.6);
 
     return WillPopScope(
       onWillPop: () async {
-        // 1️⃣ If confirm dialog is visible → close it first
         if (showFloating) {
           ref.read(floatingConfirmProvider.notifier).hide();
           return false;
         }
-
-        // 2️⃣ Otherwise → go back to Home tab
         ref.read(navigationProvider.notifier).updateIndex(0);
         ref.read(navbarVisibleProvider.notifier).state = true;
         return false;
@@ -38,182 +44,99 @@ class VotingScreen extends ConsumerWidget {
       child: Stack(
         children: [
           Scaffold(
-            backgroundColor: AppColors.background,
+            backgroundColor: bgColor,
             appBar: AppBar(
-              backgroundColor: AppColors.background,
+              backgroundColor: bgColor,
               elevation: 0,
               automaticallyImplyLeading: false,
               leading: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: AppColors.textPrimary,
-                  size: 20,
-                ),
+                icon: Icon(Icons.arrow_back_ios_new_rounded, color: textColor, size: 20),
                 onPressed: () {
-                  ref
-                      .read(navigationProvider.notifier)
-                      .updateIndex(0);
-                  ref
-                      .read(navbarVisibleProvider.notifier)
-                      .state = true;
+                  ref.read(navigationProvider.notifier).updateIndex(0);
+                  ref.read(navbarVisibleProvider.notifier).state = true;
                 },
               ),
-              title: const Text(
+              title: Text(
                 'Vote for Player of the Match',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 17,
-                  letterSpacing: -0.3,
-                ),
+                style: TextStyle(color: textColor, fontWeight: FontWeight.w600, fontSize: 17, letterSpacing: -0.3),
               ),
             ),
-
-            /// ===============================
-            /// BODY
-            /// ===============================
             body: state.data.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.primary,
-                ),
-              ),
-              error: (e, _) => Center(
-                child: Text(
-                  'Error: $e',
-                  style: const TextStyle(color: Colors.red),
-                ),
-              ),
+              loading: () => Center(child: CircularProgressIndicator(color: AppColors.primary)),
+              error: (e, _) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.red))),
               data: (data) {
                 return NotificationListener<UserScrollNotification>(
                   onNotification: (notification) {
-                    if (notification.direction ==
-                        ScrollDirection.reverse) {
-                      ref
-                          .read(navbarVisibleProvider.notifier)
-                          .state = false;
-                    } else if (notification.direction ==
-                        ScrollDirection.forward) {
-                      ref
-                          .read(navbarVisibleProvider.notifier)
-                          .state = true;
+                    if (notification.direction == ScrollDirection.reverse) {
+                      ref.read(navbarVisibleProvider.notifier).state = false;
+                    } else if (notification.direction == ScrollDirection.forward) {
+                      ref.read(navbarVisibleProvider.notifier).state = true;
                     }
                     return true;
                   },
                   child: ListView(
-                    padding:
-                    const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
                     children: [
-                      /// RIGHTS CARD
+                      // Voting Rights Card
                       VotingRightsCard(
                         rights: data.rights,
-                        onAccept: () {
-                          ref
-                              .read(
-                            votingProvider(matchId).notifier,
-                          )
-                              .acceptRights();
-                        },
+                        onAccept: () => ref.read(votingProvider(matchId).notifier).acceptRights(),
+                        isDarkMode: isDarkMode, // ✅ Pass dark mode
                       ),
-
                       const SizedBox(height: 20),
 
-                      const Padding(
-                        padding:
-                        EdgeInsets.only(left: 4, bottom: 10),
+                      // Players List Title
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4, bottom: 10),
                         child: Text(
                           'Voting Players List',
-                          style: TextStyle(
-                            color: Color(0xFF6B7280),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: TextStyle(color: subTextColor, fontSize: 13, fontWeight: FontWeight.w500),
                         ),
                       ),
 
-                      /// PLAYER TABLE
+                      // Player Table
                       Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1A1A1A),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        decoration: BoxDecoration(color: cardBgColor, borderRadius: BorderRadius.circular(12)),
                         child: Column(
                           children: [
-                            /// HEADER
+                            // Table Header
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF242424),
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(12),
-                                  topRight: Radius.circular(12),
-                                ),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: headerBgColor,
+                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12)),
                               ),
                               child: Row(
                                 children: [
-                                  _headerText('No.', 24),
+                                  _headerText('No.', 24, headerTextColor),
                                   const SizedBox(width: 32),
-                                  _headerText(
-                                    'Name',
-                                    null,
-                                    flex: 2,
-                                  ),
-                                  _headerText(
-                                    'Number',
-                                    55,
-                                    align: TextAlign.center,
-                                  ),
-                                  _headerText(
-                                    'Position',
-                                    70,
-                                    align: TextAlign.end,
-                                  ),
+                                  _headerText('Name', null, headerTextColor, flex: 2),
+                                  _headerText('Number', 55, headerTextColor, align: TextAlign.center),
+                                  _headerText('Position', 70, headerTextColor, align: TextAlign.end),
                                 ],
                               ),
                             ),
 
-                            /// PLAYER ROWS
-                            ...List.generate(
-                              data.candidates.length,
-                                  (i) {
-                                final player = data.candidates[i];
-                                final isSelected =
-                                    state.selectedCandidateId ==
-                                        player.id;
+                            // Player Rows
+                            ...List.generate(data.candidates.length, (i) {
+                              final player = data.candidates[i];
+                              final isSelected = state.selectedCandidateId == player.id;
 
-                                return VotingPlayerRow(
-                                  index: i + 1,
-                                  player: player,
-                                  selected: isSelected,
-                                  isLastItem:
-                                  i ==
-                                      data.candidates.length -
-                                          1,
-                                  onTap: () {
-                                    ref
-                                        .read(
-                                      votingProvider(matchId)
-                                          .notifier,
-                                    )
-                                        .selectCandidate(player.id);
-
-                                    ref
-                                        .read(
-                                      floatingConfirmProvider
-                                          .notifier,
-                                    )
-                                        .show();
-                                  },
-                                );
-                              },
-                            ),
+                              return VotingPlayerRow(
+                                index: i + 1,
+                                player: player,
+                                selected: isSelected,
+                                isLastItem: i == data.candidates.length - 1,
+                                isDarkMode: isDarkMode, // ✅ Pass dark mode
+                                onTap: () {
+                                  ref.read(votingProvider(matchId).notifier).selectCandidate(player.id);
+                                  ref.read(floatingConfirmProvider.notifier).show();
+                                },
+                              );
+                            }),
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 20),
                     ],
                   ),
@@ -222,44 +145,20 @@ class VotingScreen extends ConsumerWidget {
             ),
           ),
 
-          /// ===============================
-          /// FLOATING CONFIRM OVERLAY
-          /// ===============================
+          // Floating Confirm Overlay
           if (showFloating)
             FloatingConfirmScreen(
               title: 'Confirm Vote',
-              message:
-              'Are you sure you want to vote for this player?',
+              message: 'Are you sure you want to vote for this player?',
+              isDarkMode: isDarkMode, // ✅ Pass dark mode
               onConfirm: () async {
-                await ref
-                    .read(
-                  votingProvider(matchId).notifier,
-                )
-                    .submitVote();
-
-                ref
-                    .read(
-                  floatingConfirmProvider.notifier,
-                )
-                    .hide();
-
-                ref
-                    .read(
-                  navbarVisibleProvider.notifier,
-                )
-                    .state = true;
-
-                ref
-                    .read(
-                  navigationProvider.notifier,
-                )
-                    .updateIndex(0);
+                await ref.read(votingProvider(matchId).notifier).submitVote();
+                ref.read(floatingConfirmProvider.notifier).hide();
+                ref.read(navbarVisibleProvider.notifier).state = true;
+                ref.read(navigationProvider.notifier).updateIndex(0);
 
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Thanks for voting!'),
-                    backgroundColor: Colors.green,
-                  ),
+                  const SnackBar(content: Text('Thanks for voting!'), backgroundColor: Colors.green),
                 );
               },
             ),
@@ -268,28 +167,10 @@ class VotingScreen extends ConsumerWidget {
     );
   }
 
-  /// ===============================
-  /// HEADER TEXT HELPER
-  /// ===============================
-  Widget _headerText(
-      String text,
-      double? width, {
-        int flex = 1,
-        TextAlign align = TextAlign.start,
-      }) {
-    final child = Text(
-      text,
-      textAlign: align,
-      style: TextStyle(
-        color: Colors.white.withOpacity(0.4),
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-
-    if (width != null) {
-      return SizedBox(width: width, child: child);
-    }
+  /// Header Text Helper
+  Widget _headerText(String text, double? width, Color color, {int flex = 1, TextAlign align = TextAlign.start}) {
+    final child = Text(text, textAlign: align, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600));
+    if (width != null) return SizedBox(width: width, child: child);
     return Expanded(flex: flex, child: child);
   }
 }

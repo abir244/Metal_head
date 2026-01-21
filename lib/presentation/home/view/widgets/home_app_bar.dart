@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/theme/theme_provider.dart';
 
 class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
   const HomeAppBar({
@@ -21,18 +22,22 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final bool isDarkMode = ref.watch(themeProvider);
+
+    // Background and icon colors
+    final Color bgColor = isDarkMode ? Colors.teal[800]! : AppColors.background;
+    final Color iconColor = isDarkMode ? Colors.white : AppColors.textPrimary;
+    final Color borderColor = isDarkMode ? Colors.white12 : Colors.black12;
+
     return AppBar(
-      backgroundColor: AppColors.background,
+      backgroundColor: bgColor,
       elevation: 0,
       scrolledUnderElevation: 0,
       automaticallyImplyLeading: false,
       centerTitle: false,
       titleSpacing: 20,
       shape: Border(
-        bottom: BorderSide(
-          color: AppColors.textPrimary.withOpacity(0.05),
-          width: 1,
-        ),
+        bottom: BorderSide(color: borderColor, width: 1),
       ),
       title: Hero(
         tag: 'app_logo',
@@ -40,6 +45,7 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
           'assets/images/image6.png',
           height: 32,
           fit: BoxFit.contain,
+          color: isDarkMode ? Colors.white : null, // optional tint
         ),
       ),
       actions: [
@@ -50,34 +56,24 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
             alignment: Alignment.center,
             clipBehavior: Clip.none,
             children: [
-              const Icon(
-                Icons.notifications_none_rounded,
-                size: 28,
-                color: AppColors.textPrimary,
-              ),
+              Icon(Icons.notifications_none_rounded, size: 28, color: iconColor),
               if ((unreadCount ?? 0) > 0)
                 Positioned(
                   right: -2,
                   top: -2,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    constraints: const BoxConstraints(
-                      minWidth: 18,
-                      minHeight: 18,
-                    ),
+                    constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.background,
-                        width: 2,
-                      ),
+                      border: Border.all(color: bgColor, width: 2),
                     ),
                     child: Center(
                       child: Text(
                         unreadCount! > 9 ? '9+' : unreadCount!.toString(),
-                        style: const TextStyle(
-                          color: AppColors.background,
+                        style: TextStyle(
+                          color: isDarkMode ? Colors.black : AppColors.background,
                           fontSize: 9,
                           fontWeight: FontWeight.w900,
                         ),
@@ -86,6 +82,18 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   ),
                 ),
             ],
+          ),
+        ),
+
+        /// DARK MODE TOGGLE
+        _AppBarAction(
+          onTap: () {
+            ref.read(themeProvider.notifier).state = !isDarkMode;
+          },
+          child: Icon(
+            isDarkMode ? Icons.light_mode : Icons.dark_mode,
+            size: 28,
+            color: iconColor,
           ),
         ),
 
@@ -99,13 +107,13 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppColors.primary.withOpacity(0.3),
+                  color: isDarkMode ? Colors.white24 : Colors.black12,
                   width: 1.5,
                 ),
               ),
               child: CircleAvatar(
                 radius: 16,
-                backgroundColor: AppColors.surface,
+                backgroundColor: isDarkMode ? Colors.grey[850] : AppColors.surface,
                 backgroundImage: _getAvatar(),
               ),
             ),
@@ -126,7 +134,6 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
   }
 }
 
-/// Helper for consistent icon action styling
 class _AppBarAction extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
@@ -141,11 +148,7 @@ class _AppBarAction extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
-      child: SizedBox(
-        width: 44,
-        height: 44,
-        child: Center(child: child),
-      ),
+      child: SizedBox(width: 44, height: 44, child: Center(child: child)),
     );
   }
 }

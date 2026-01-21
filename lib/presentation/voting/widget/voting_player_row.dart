@@ -1,4 +1,3 @@
-// lib/presentation/voting/widget/voting_player_row.dart
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../voting_rights/model/voting_model.dart';
@@ -8,6 +7,7 @@ class VotingPlayerRow extends StatelessWidget {
   final PlayerCandidate player;
   final bool selected;
   final bool isLastItem;
+  final bool isDarkMode; // ✅ fixed type
   final VoidCallback onTap;
 
   const VotingPlayerRow({
@@ -17,20 +17,26 @@ class VotingPlayerRow extends StatelessWidget {
     required this.selected,
     this.isLastItem = false,
     required this.onTap,
+    required this.isDarkMode, // ✅ fixed
   });
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = isDarkMode ? const Color(0xFF1A1A1A) : Colors.white;
+    final borderColor = isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black12;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final subTextColor = isDarkMode ? Colors.white.withOpacity(0.5) : Colors.black45;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A1A),
+          color: bgColor,
           border: isLastItem
               ? null
               : Border(
             bottom: BorderSide(
-              color: Colors.white.withOpacity(0.05),
+              color: borderColor,
               width: 1,
             ),
           ),
@@ -50,7 +56,7 @@ class VotingPlayerRow extends StatelessWidget {
               child: Text(
                 index.toString(),
                 style: TextStyle(
-                  color: selected ? AppColors.primary : Colors.white.withOpacity(0.6),
+                  color: selected ? AppColors.primary : subTextColor,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
@@ -74,8 +80,8 @@ class VotingPlayerRow extends StatelessWidget {
               child: Text(
                 player.name,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: textColor,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                   letterSpacing: -0.2,
@@ -92,7 +98,7 @@ class VotingPlayerRow extends StatelessWidget {
                 '#${player.number}',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
+                  color: subTextColor,
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
                 ),
@@ -106,7 +112,7 @@ class VotingPlayerRow extends StatelessWidget {
                 player.position,
                 textAlign: TextAlign.end,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
+                  color: subTextColor,
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
                 ),

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart' as app_colors;
+import '../../../../core/theme/theme_provider.dart';
 
 
 /// ============================================================
@@ -76,28 +77,27 @@ const List<NavItem> navItems = [
 /// ============================================================
 /// MAIN BOTTOM NAV BAR
 /// ============================================================
-
 class CustomBottomNavBar extends ConsumerWidget {
   const CustomBottomNavBar({super.key});
 
-  static const Duration _animationDuration =
-  Duration(milliseconds: 350);
+  static const Duration _animationDuration = Duration(milliseconds: 350);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final int currentIndex = ref.watch(navigationProvider);
-    final double bottomPadding =
-        MediaQuery.of(context).padding.bottom;
+    final bool isDarkMode = ref.watch(themeProvider); // 🔥 watch dark mode
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
+
+    final Color bgColor = isDarkMode ? Colors.grey[900]! : Colors.white;
+    final Color borderColor =
+    isDarkMode ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.08);
 
     return Container(
       height: 65 + bottomPadding,
       decoration: BoxDecoration(
-        color: Colors.black,
+        color: bgColor,
         border: Border(
-          top: BorderSide(
-            color: Colors.white.withOpacity(0.08),
-            width: 0.5,
-          ),
+          top: BorderSide(color: borderColor, width: 0.5),
         ),
       ),
       child: Row(
@@ -108,19 +108,12 @@ class CustomBottomNavBar extends ConsumerWidget {
               item: navItems[index],
               isSelected: currentIndex == index,
               bottomPadding: bottomPadding,
+              isDarkMode: isDarkMode, // 🔥 pass theme
               onTap: () {
                 if (currentIndex != index) {
                   HapticFeedback.lightImpact();
-
-                  // Update tab index
-                  ref
-                      .read(navigationProvider.notifier)
-                      .updateIndex(index);
-
-                  // Ensure navbar is visible
-                  ref
-                      .read(navbarVisibleProvider.notifier)
-                      .state = true;
+                  ref.read(navigationProvider.notifier).updateIndex(index);
+                  ref.read(navbarVisibleProvider.notifier).state = true;
                 }
               },
             );
@@ -131,32 +124,28 @@ class CustomBottomNavBar extends ConsumerWidget {
   }
 }
 
-
-/// ============================================================
-/// SINGLE NAV ITEM WIDGET
-/// ============================================================
-
 class _BottomNavItem extends StatelessWidget {
   const _BottomNavItem({
     required this.item,
     required this.isSelected,
     required this.onTap,
     required this.bottomPadding,
+    required this.isDarkMode, // 🔥 new
   });
 
   final NavItem item;
   final bool isSelected;
   final VoidCallback onTap;
   final double bottomPadding;
+  final bool isDarkMode;
 
-  static const Duration _animationDuration =
-  Duration(milliseconds: 350);
+  static const Duration _animationDuration = Duration(milliseconds: 350);
 
   @override
   Widget build(BuildContext context) {
-    final Color itemColor = isSelected
-        ? app_colors.AppColors.primary
-        : Colors.white.withOpacity(0.5);
+    final Color selectedColor = app_colors.AppColors.primary;
+    final Color unselectedColor = isDarkMode ? Colors.white54 : Colors.black54;
+    final Color itemColor = isSelected ? selectedColor : unselectedColor;
 
     return Expanded(
       child: GestureDetector(
@@ -171,9 +160,7 @@ class _BottomNavItem extends StatelessWidget {
               width: isSelected ? 40 : 0,
               height: 2.5,
               decoration: BoxDecoration(
-                color: isSelected
-                    ? app_colors.AppColors.primary
-                    : Colors.transparent,
+                color: isSelected ? selectedColor : Colors.transparent,
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(2),
                 ),
@@ -183,9 +170,7 @@ class _BottomNavItem extends StatelessWidget {
             /// Icon + Label
             Expanded(
               child: Padding(
-                padding: EdgeInsets.only(
-                  bottom: bottomPadding > 0 ? 5 : 0,
-                ),
+                padding: EdgeInsets.only(bottom: bottomPadding > 0 ? 5 : 0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -194,9 +179,7 @@ class _BottomNavItem extends StatelessWidget {
                       scale: isSelected ? 1.18 : 1.0,
                       curve: Curves.easeOutBack,
                       child: Icon(
-                        isSelected
-                            ? item.activeIcon
-                            : item.icon,
+                        isSelected ? item.activeIcon : item.icon,
                         color: itemColor,
                         size: 24,
                       ),
@@ -206,9 +189,7 @@ class _BottomNavItem extends StatelessWidget {
                       duration: _animationDuration,
                       style: TextStyle(
                         fontSize: 10,
-                        fontWeight: isSelected
-                            ? FontWeight.w700
-                            : FontWeight.w400,
+                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                         color: itemColor,
                         letterSpacing: 0.2,
                       ),

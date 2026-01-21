@@ -1,4 +1,3 @@
-// lib/presentation/voting/widget/voting_rights_card.dart
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../voting_rights/model/voting_model.dart';
@@ -6,19 +5,26 @@ import '../../voting_rights/model/voting_model.dart';
 class VotingRightsCard extends StatelessWidget {
   final VotingRight rights;
   final VoidCallback onAccept;
+  final bool isDarkMode; // ✅ add this as a field
 
   const VotingRightsCard({
     super.key,
     required this.rights,
     required this.onAccept,
+    required this.isDarkMode, // ✅ constructor parameter
   });
 
   @override
   Widget build(BuildContext context) {
+    // Dynamic colors
+    final bgColor = isDarkMode ? const Color(0xFF1A1A1A) : Colors.white;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final secondaryTextColor = isDarkMode ? Colors.white70 : Colors.black54;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: bgColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Colors.white.withOpacity(0.1),
@@ -31,11 +37,11 @@ class VotingRightsCard extends StatelessWidget {
           // Top line: "Accept Voting Rights" + chevron
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Accept Voting Rights',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: textColor,
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
                     letterSpacing: -0.2,
@@ -44,7 +50,7 @@ class VotingRightsCard extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right,
-                color: Colors.white.withOpacity(0.6),
+                color: textColor.withOpacity(0.6),
                 size: 20,
               ),
             ],
@@ -66,7 +72,7 @@ class VotingRightsCard extends StatelessWidget {
             child: Text(
               'Parent ${rights.assignedByParentName} has assigned you the right to vote for ${rights.childName} as his Parent Representative.',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: secondaryTextColor.withOpacity(0.7),
                 fontSize: 13,
                 height: 1.4,
                 letterSpacing: -0.1,
@@ -79,7 +85,7 @@ class VotingRightsCard extends StatelessWidget {
           // Accept button
           Align(
             alignment: Alignment.centerRight,
-            child: Container(
+            child: SizedBox(
               height: 36,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
